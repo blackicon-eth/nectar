@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "motion/react";
 import { useAccount } from "wagmi";
-import { useSignMessage } from "wagmi";
+import { useWalletClient } from "wagmi";
+import { useChainId } from "wagmi";
 import { articleSigningMessage } from "@/lib/articleSigning";
 import { MIN_ARTICLE_CHARS } from "@/lib/articles";
 import { FIXED_TAGS } from "@/lib/tags";
@@ -20,8 +21,10 @@ export default function ArticleForm() {
   const router = useRouter();
   const { reload } = useArticles();
   const { address } = useAccount();
-  const { signMessageAsync } = useSignMessage();
-  const creator = address ?? "";
+  const connectedChainId = useChainId();
+  const { data: walletClient } = useWalletClient();
+  const creator = walletClient?.account.address ?? address ?? "";
+  const chainId = walletClient?.chain.id ?? connectedChainId;
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [content, setContent] = useState("");
@@ -58,20 +61,28 @@ export default function ArticleForm() {
       const formData = new FormData();
        formData.append("creator", "");
        formData.append("creatorAddress", creator);
+       formData.append("chainId", String(chainId));
       formData.append("title", title);
       formData.append("subtitle", subtitle);
       formData.append("content", content);
       formData.append("tags", JSON.stringify(tags));
        formData.append("premium", String(premium));
-       const signature = await signMessageAsync({
-         message: articleSigningMessage({
-           title,
-           subtitle,
-           content,
-           tags,
-           premium,
-         }),
+       if (!walletClient || !creator) {
+         throw new Error("The connected wallet is not ready to sign.");
+       }
+       const signedMessage = articleSigningMessage({
+         chainId,
+         title,
+         subtitle,
+         content,
+         tags,
+         premium,
        });
+       const signature = await walletClient.signMessage({
+         account: creator,
+         message: signedMessage,
+       });
+       formData.append("signedMessage", signedMessage);
        formData.append("signature", signature);
       if (image) formData.append("image", image);
 
@@ -80,7 +91,13 @@ export default function ArticleForm() {
         body: formData,
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Publish failed");
+       if (!res.ok) {
+         const parts: string[] = [data.error ?? "Publish failed"];
+         if (data.attempts) parts.push(`Attempts: ${data.attempts}`);
+         if (data.reason) parts.push(`Reason: ${data.reason}.`);
+         if (data.escaped) parts.push(`Escaped: ${data.escaped}`);
+         throw new Error(parts.join(" "));
+       }
       toast.success("Published", { description: "Article is live." });
       try {
         await reload();
@@ -293,8 +310,6 @@ export default function ArticleForm() {
           {loading ? "Broadcasting…" : "Publish Article"}
         </Button>
       </div>
-
-      {error && <div className="mt-4 rounded-md border border-rust bg-paper-raised p-4 text-[14px] text-rust [overflow-wrap:anywhere]">{error}</div>}
 
     </div>
   );

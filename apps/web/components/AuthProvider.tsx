@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useAccount, useChainId, useSignMessage } from "wagmi";
+import { useAccount, useChainId, useWalletClient } from "wagmi";
 
 type AuthStatus = "checking" | "signed-out" | "signed-in";
 
@@ -22,39 +22,44 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const { address, isConnected } = useAccount();
-  const chainId = useChainId();
-  const { signMessageAsync } = useSignMessage();
+  const { address: connectedAddress, isConnected } = useAccount();
+  const connectedChainId = useChainId();
+  const { data: walletClient } = useWalletClient();
+  const address = walletClient?.account.address ?? connectedAddress;
+  const chainId = walletClient?.chain.id ?? connectedChainId;
   const [status, setStatus] = useState<AuthStatus>("checking");
   const [signing, setSigning] = useState(false);
 
   useEffect(() => {
     let active = true;
-    if (!isConnected || !address) {
-      setStatus("signed-out");
-      return () => {
-        active = false;
-      };
-    }
+    const timer = window.setTimeout(() => {
+      if (!active) return;
+      if (!isConnected || !address) {
+        setStatus("signed-out");
+        return;
+      }
 
-    setStatus("checking");
-    fetch("/api/auth/session", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((session: { authenticated?: boolean; address?: string | null }) => {
-        if (!active) return;
-        setStatus(
-          session.authenticated &&
-            session.address?.toLowerCase() === address.toLowerCase()
-            ? "signed-in"
-            : "signed-out",
-        );
-      })
-      .catch(() => active && setStatus("signed-out"));
+      setStatus("checking");
+      fetch("/api/auth/session", { cache: "no-store" })
+        .then((response) => response.json())
+        .then((session: { authenticated?: boolean; address?: string | null; chainId?: number | null }) => {
+          if (!active) return;
+          setStatus(
+            session.authenticated &&
+              session.address?.toLowerCase() === address.toLowerCase() &&
+              session.chainId === chainId
+              ? "signed-in"
+              : "signed-out",
+          );
+        })
+        .catch(() => active && setStatus("signed-out"));
+    }, 0);
 
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
-  }, [address, isConnected]);
+  }, [address, chainId, isConnected]);
 
   async function signIn() {
     if (!address) return;
@@ -73,7 +78,11 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(nonceData.error ?? "Unable to start sign-in.");
       }
 
-      const signature = await signMessageAsync({ message: nonceData.message });
+      if (!walletClient) throw new Error("The connected wallet is not ready to sign.");
+      const signature = await walletClient.signMessage({
+        account: address,
+        message: nonceData.message,
+      });
       const verifyResponse = await fetch("/api/auth/verify", {
         method: "POST",
         headers: { "content-type": "application/json" },

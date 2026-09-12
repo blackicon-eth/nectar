@@ -6,6 +6,7 @@ import { createArkivWalletClient, createArkivPublicClient } from "./client";
 export interface ArticleEntityFields {
   creator: string;
   creatorAddress: string;
+  chainId: number;
   signature: string;
   creatorEnsName?: string;
   contributor?: string;
@@ -72,6 +73,7 @@ export async function createArticleEntity(
       tags: fields.tags,
       creator: fields.creator,
       creatorAddress: fields.creatorAddress,
+      chainId: fields.chainId,
       signature: fields.signature,
       creatorEnsName: fields.creatorEnsName,
       contributor: fields.contributor,
@@ -91,7 +93,7 @@ export async function createArticleEntity(
       type: str("article"),
       creator: str(fields.creator),
       creator_address: str(fields.creatorAddress),
-      signature: str(fields.signature),
+      chain_id: u64(BigInt(fields.chainId)),
       title: str(fields.title),
       image_ref: str(fields.imageRef ?? ""),
       image_content_type: str(fields.imageContentType ?? ""),
@@ -126,7 +128,6 @@ export async function patchArticleEntity(
   if (fields.creatorAddress !== undefined) {
     set.creator_address = fields.creatorAddress;
   }
-  if (fields.signature !== undefined) set.signature = fields.signature;
   if (fields.creatorEnsName !== undefined) {
     set.creatorEnsName = fields.creatorEnsName;
   }

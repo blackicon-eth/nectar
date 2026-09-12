@@ -8,6 +8,7 @@ export interface Article {
   tags: string[];
   creator: string;
   creatorAddress: string;
+  chainId?: number;
   signature: string;
   creatorEnsName?: string;
   contributor?: string;

@@ -9,6 +9,7 @@ export interface ArticleSummary {
   tags: string[];
   creator: string;
   creatorAddress: string;
+  chainId?: number;
   signature: string;
   creatorEnsName?: string;
   contributor?: string;
@@ -57,6 +58,7 @@ export async function listPublishedArticles(): Promise<ArticleSummary[]> {
       creatorAddress: strValue(
         payload.creatorAddress ?? attr("creator_address"),
       ),
+      chainId: numberValue(payload.chainId ?? attr("chain_id")),
       signature: strValue(payload.signature ?? attr("signature")),
       creatorEnsName: strValue(payload.creatorEnsName) || undefined,
       contributor: strValue(payload.contributor) || undefined,

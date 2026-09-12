@@ -1,4 +1,5 @@
 export interface ArticleSigningFields {
+  chainId: number;
   title: string;
   subtitle: string;
   content: string;
@@ -8,6 +9,7 @@ export interface ArticleSigningFields {
 
 export function articleSigningMessage(fields: ArticleSigningFields): string {
   return `Nectar article publication\n${JSON.stringify({
+    chainId: fields.chainId,
     title: fields.title,
     subtitle: fields.subtitle,
     content: fields.content,

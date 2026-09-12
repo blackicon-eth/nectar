@@ -24,6 +24,7 @@ export default function WalletGate({
   const { status, signing, signIn } = useAuth();
   const checking = status === "checking";
   const authenticated = status === "signed-in";
+  const walletReady = isConnected && !checking;
 
   return (
     <AnimatePresence mode="wait" initial={false}>
@@ -52,14 +53,14 @@ export default function WalletGate({
           </div>
            <AnimatePresence mode="wait" initial={false}>
              <motion.span
-               key={checking ? "checking" : isConnected ? "signature" : "wallet"}
+               key={checking ? "checking" : walletReady ? "signature" : "wallet"}
                className="font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-amber"
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
                exit={{ opacity: 0 }}
                transition={{ duration: 0.18 }}
              >
-               {checking ? "Checking access" : isConnected ? "Signature required" : "Wallet required"}
+               {checking ? "Checking access" : walletReady ? "Signature required" : "Wallet required"}
              </motion.span>
            </AnimatePresence>
           <h1 className="font-display text-headline-lg mt-2 max-md:text-[32px] max-md:leading-[1.2]">
@@ -68,19 +69,19 @@ export default function WalletGate({
           <p className="text-body-md mt-3 max-w-lg text-muted">{description}</p>
            <Button
              className="mt-7"
-             icon={isConnected ? "draw" : "account_balance_wallet"}
+             icon={walletReady ? "draw" : "account_balance_wallet"}
              disabled={checking || signing}
-             onClick={() => (isConnected ? signIn() : openConnectModal?.())}
+             onClick={() => (walletReady ? signIn() : openConnectModal?.())}
            >
              <AnimatePresence mode="wait" initial={false}>
                <motion.span
-                 key={checking ? "checking" : signing ? "signing" : isConnected ? "signin" : "connect"}
+                 key={checking ? "checking" : signing ? "signing" : walletReady ? "signin" : "connect"}
                  initial={{ opacity: 0 }}
                  animate={{ opacity: 1 }}
                  exit={{ opacity: 0 }}
                  transition={{ duration: 0.18 }}
                >
-                 {checking ? "Checking…" : signing ? "Signing…" : isConnected ? "Sign in with Wallet" : "Connect Wallet"}
+                 {checking ? "Checking…" : signing ? "Signing…" : walletReady ? "Sign in with Wallet" : "Connect Wallet"}
                </motion.span>
              </AnimatePresence>
            </Button>

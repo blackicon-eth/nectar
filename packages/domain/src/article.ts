@@ -16,6 +16,7 @@ export type ArticleStatus = (typeof ArticleStatus)[keyof typeof ArticleStatus];
 export const ArticleInputSchema = z.object({
   creator: z.string().max(255).optional().default(""),
   creatorAddress: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
+  chainId: z.number().int().positive(),
   signature: z.string().regex(/^0x[0-9a-fA-F]{130}$/),
   creatorEnsName: z.string().max(255).optional(),
   contributor: z.string().max(64).optional(),

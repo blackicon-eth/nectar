@@ -10,6 +10,7 @@ export async function GET() {
   return NextResponse.json({
     authenticated: Boolean(session),
     address: session?.walletAddress ?? null,
+    chainId: session?.chainId ?? null,
   });
 }
 

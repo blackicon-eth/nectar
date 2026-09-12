@@ -85,6 +85,7 @@ export async function publishArticle(
   const fields: ArticleEntityFields = {
     creator: input.creator || input.creatorAddress,
     creatorAddress: input.creatorAddress,
+    chainId: input.chainId,
     signature: input.signature,
     creatorEnsName: input.creatorEnsName,
     contributor: input.contributor,

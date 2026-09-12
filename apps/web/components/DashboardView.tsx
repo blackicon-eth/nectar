@@ -1,330 +1,278 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useArticles } from "@/components/ArticlesProvider";
+import { useAuth } from "@/components/AuthProvider";
 import { formatDate, readTime, short } from "@/lib/articles";
 import Avatar from "./ui/Avatar";
 import Badge from "./ui/Badge";
 import Button from "./ui/Button";
 import Icon from "./ui/Icon";
 
-type Tab = "overview" | "articles" | "reviews" | "contributors" | "settings";
+type Tab = "overview" | "articles" | "settings";
 
-const TABS: { id: Tab; label: string; count?: number }[] = [
-  { id: "overview", label: "Overview" },
-  { id: "articles", label: "My Articles" },
-  { id: "reviews", label: "Review Submissions", count: 3 },
-  { id: "contributors", label: "Contributors", count: 4 },
-  { id: "settings", label: "Settings" },
-];
-
-const METRICS = [
-  { label: "Patron Base", value: "1,428", delta: "+14%", note: "this publishing cycle", icon: "group", tint: "var(--color-amber-soft)" },
-  { label: "Monthly Flow", value: "8.4 AVAX", note: "~$260 USD accrued via patronage", icon: "toll", tint: "#ffe6c2" },
+const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: "overview", label: "Overview", icon: "dashboard" },
+  { id: "articles", label: "My articles", icon: "auto_stories" },
+  { id: "settings", label: "Identity", icon: "fingerprint" },
 ];
 
 export default function DashboardView() {
-  const { articles } = useArticles();
-  const [tab, setTab] = useState<Tab>("articles");
+  const { articles, status } = useArticles();
+  const { address } = useAuth();
+  const [tab, setTab] = useState<Tab>("overview");
+  const [copied, setCopied] = useState<string | null>(null);
 
-  const premiumCount = articles.filter((a) => a.premium).length;
-  const publicCount = articles.length - premiumCount;
+  const ownedArticles = useMemo(
+    () =>
+      address
+        ? articles.filter(
+          (article) =>
+            article.creatorAddress?.toLowerCase() === address.toLowerCase(),
+        )
+        : [],
+    [address, articles],
+  );
+  const premiumCount = ownedArticles.filter((article) => article.premium).length;
+  const totalCharacters = ownedArticles.reduce(
+    (total, article) => total + (article.contentLength ?? 0),
+    0,
+  );
+  const latest = ownedArticles[0];
+  const creatorName =
+    latest?.creatorEnsName || latest?.creator || (address ? short(address, 6) : "Unknown author");
+
+  async function copyReference(reference: string) {
+    await navigator.clipboard?.writeText(reference);
+    setCopied(reference);
+    window.setTimeout(() => setCopied(null), 1600);
+  }
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-8 py-6 pb-10 md:px-8">
-      {/* Header */}
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mx-auto w-full max-w-[1480px] px-5 py-6 pb-12 sm:px-8 lg:px-12">
+      <header className="flex flex-wrap items-end justify-between gap-5 border-b border-line pb-7">
         <div>
-          <span className="inline-flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-amber">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber" /> Curator Desk · Protocol Epoch 14
-          </span>
-          <h1 className="font-display text-headline-lg mt-1 max-md:text-[32px] max-md:leading-[1.2]">
-            Editorial Ledger<span className="text-honey">.</span>
+          <h1 className="font-display mt-2 text-headline-lg max-md:text-[38px] max-md:leading-[1.08]">
+            Your publication ledger<span className="text-honey">.</span>
           </h1>
           <p className="text-body-md mt-2 max-w-2xl text-muted">
-            On-chain publication management, Swarm storage redundancy, and
-            decentralized peer review for independent publishers.
+            A clear view of the writing you have signed and published to Nectar.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" icon="archive">
-            Export Publications
-          </Button>
-          <a className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-honey px-5 py-2.5 text-[14px] font-semibold tracking-wide text-ink shadow-card transition active:scale-[0.98] hover:bg-honey-deep" href="/write">
-            <Icon name="add" size={18} /> New Parchment
-          </a>
-        </div>
-      </div>
+        <Button href="/write" icon="add">
+          Publish article
+        </Button>
+      </header>
 
-      {/* Summary bento */}
-      <div className="mb-10 grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+      <section className="mt-7 grid gap-5 lg:grid-cols-[1.45fr_1fr]">
+        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card sm:p-7">
+          <div className="flex flex-wrap items-start justify-between gap-5">
             <div className="flex items-center gap-4">
-              <Avatar size={64} name="The Autumn Apiary" />
+              <Avatar size={64} name={creatorName} />
               <div>
-                <h2 className="font-display text-title-lg flex items-center gap-2">
-                  The Autumn Apiary
-                  <Badge tier="status" icon="verified">Autonomous Pub</Badge>
-                </h2>
-                <div className="font-mono text-[13px] text-muted">
-                  curated by <span className="text-amber">@pippo.nectar.eth</span>
-                  <span className="mx-1.5">·</span> Subnet: Casentino-09
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-display text-title-lg">{creatorName}</h2>
+                  <Badge tier="status" icon="verified">Verified signer</Badge>
+                </div>
+                <div className="mt-1 break-all font-mono text-[12px] text-muted">
+                  {address}
                 </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="font-mono text-[13px] text-muted">ARKIV ROOT GRAPH</div>
-              <span className="mt-1 inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">arkiv://0x9b4a…c82f</span>
-            </div>
           </div>
-          <p className="text-body-md mt-6 max-w-xl italic text-muted">
-            “An archival catalog dedicated to seasonal apiology, traditional straw
-            skeps, and the wild nectar flows of Tuscany.”
+          <p className="text-body-md mt-7 max-w-2xl text-muted">
+            Every publication in this desk is attributed to this wallet and carries
+            its own article signature in the Arkiv record.
           </p>
         </div>
-        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
-          <div className="font-mono text-[13px] uppercase tracking-[0.08em] text-muted">
-            Article Yield (7 Days)
-          </div>
-          <div className="mt-1 flex items-center gap-2">
-            <span className="font-display text-headline-md">2.41 AVAX</span>
-            <span className="text-body-sm text-sage">
-              <Icon name="trending_up" size={14} /> +18.2%
-            </span>
-          </div>
-          <svg viewBox="0 0 200 60" className="mt-2 h-14 w-full text-honey" fill="none" preserveAspectRatio="none">
-            <path d="M0,48 Q30,42 50,30 T100,38 T150,14 T200,8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-            <path d="M0,48 Q30,42 50,30 T100,38 T150,14 T200,8 L200,60 L0,60 Z" fill="url(#honeyFade)" opacity="0.25" />
-            <defs>
-              <linearGradient id="honeyFade" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#E8A33D" />
-                <stop offset="100%" stopColor="#FAF5EC" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <div className="flex justify-between font-mono text-[13px] text-muted">
-            <span>Staking Pool: Skep-Vault</span>
-            <span className="text-ink">99.8% Uptime</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Metric cards */}
-      <div className="mb-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {METRICS.map((m) => (
-          <div key={m.label} className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
-            <div className="mb-2 flex justify-between">
-              <span className="text-label-md text-muted">{m.label}</span>
-              <span
-                className="flex h-8 w-8 items-center justify-center rounded-full"
-                style={{ background: m.tint }}
-              >
-                <Icon name={m.icon} size={18} />
-              </span>
-            </div>
-            <div className="font-display text-headline-lg max-md:text-[32px] max-md:leading-[1.2]">{m.value}</div>
-            <div className="text-body-sm mt-1 text-muted">
-              {m.delta && (
-                <span className="text-sage">
-                  <Icon name="arrow_upward" size={14} /> {m.delta}{" "}
-                </span>
-              )}
-              {m.note}
-            </div>
+        <div className="rounded-lg border border-wood bg-wood p-6 text-cream shadow-card sm:p-7">
+          <div className="font-mono text-[11px] uppercase tracking-[0.1em] text-cream/60">
+            Latest publication
           </div>
-        ))}
-        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
-          <div className="mb-2 flex justify-between">
-            <span className="text-label-md text-muted">Published Works</span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-paper-raised">
-              <Icon name="auto_stories" size={18} />
-            </span>
-          </div>
-          <div className="font-display text-headline-lg max-md:text-[32px] max-md:leading-[1.2]">{articles.length}</div>
-          <div className="text-body-sm mt-1 flex gap-1.5 text-muted">
-            <span className="inline-flex items-center gap-1.5 rounded-sm bg-amber/20 px-2.5 py-0.5 font-mono text-[13px] text-amber">
-              {premiumCount} Gated
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">{publicCount} Public</span>
-          </div>
+          {latest ? (
+            <>
+              <h2 className="font-display mt-4 line-clamp-2 text-title-lg">{latest.title}</h2>
+              <div className="mt-3 flex items-center gap-2 font-mono text-[12px] text-cream/65">
+                <span>{formatDate(latest.publishedAt)}</span>
+                <span>·</span>
+                <span>{readTime(latest)}</span>
+              </div>
+              <a href={`/article/${latest.swarmRef}`} className="mt-6 inline-flex items-center gap-2 font-semibold text-honey hover:text-cream">
+                Open article <Icon name="arrow_outward" size={16} />
+              </a>
+            </>
+          ) : (
+            <>
+              <h2 className="font-display mt-4 text-title-lg">Your first article is waiting.</h2>
+              <p className="mt-3 text-body-sm text-cream/65">Start with a signed publication and it will appear here.</p>
+              <a href="/write" className="mt-6 inline-flex items-center gap-2 font-semibold text-honey hover:text-cream">
+                Open the editor <Icon name="arrow_outward" size={16} />
+              </a>
+            </>
+          )}
         </div>
-        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
-          <div className="mb-2 flex justify-between">
-            <span className="text-label-md text-muted">Swarm Node Health</span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sage-soft">
-              <Icon name="hub" size={18} />
-            </span>
-          </div>
-          <div className="font-display text-headline-lg flex items-baseline gap-2 max-md:text-[32px] max-md:leading-[1.2]">
-            100% <span className="font-mono text-[13px] text-sage">Pinned</span>
-          </div>
-          <div className="text-body-sm mt-1 flex items-center gap-1.5 text-muted">
-            <span className="inline-block h-2 w-2 rounded-full bg-sage" /> ACT Postage Batches Valid
-          </div>
-        </div>
-      </div>
+      </section>
 
-      {/* Tabs */}
-      <div className="mb-6 flex gap-1 overflow-x-auto rounded-md bg-paper-raised p-1">
-        {TABS.map((t) => (
+      <section className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Metric label="Published articles" value={String(ownedArticles.length)} icon="auto_stories" />
+        <Metric label="Public articles" value={String(ownedArticles.length - premiumCount)} icon="public" />
+        <Metric label="Premium articles" value={String(premiumCount)} icon="lock" />
+        <Metric
+          label="Words recorded"
+          value={totalCharacters ? totalCharacters.toLocaleString() : "—"}
+          icon="notes"
+        />
+      </section>
+
+      <nav className="mt-9 flex gap-1 overflow-x-auto rounded-md bg-paper-raised p-1" aria-label="Dashboard sections">
+        {TABS.map((item) => (
           <button
-            key={t.id}
-            className={`inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-1.5 text-[14px] font-medium transition ${tab === t.id ? "bg-wood text-cream" : "bg-paper-raised text-muted hover:bg-[#ece3d0] hover:text-ink"}`}
-            onClick={() => setTab(t.id)}
+            key={item.id}
+            type="button"
+            onClick={() => setTab(item.id)}
+            className={`inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-[14px] font-medium transition ${tab === item.id ? "bg-wood text-cream" : "text-muted hover:bg-paper-card hover:text-ink"}`}
           >
-            {t.label}
-            {t.count !== undefined && <span className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">{t.count}</span>}
+            <Icon name={item.icon} size={16} />
+            {item.label}
+            {item.id === "articles" && <span className="font-mono text-[12px] opacity-70">{ownedArticles.length}</span>}
           </button>
         ))}
-      </div>
-
-      {/* Tab content */}
-      {tab === "articles" && (
-        <div className="overflow-hidden rounded-lg border border-line bg-paper-card shadow-card">
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className="bg-paper-raised px-4 py-3 text-left font-mono text-[13px] font-semibold text-muted">Manuscript Title</th>
-                <th className="bg-paper-raised px-4 py-3 text-left font-mono text-[13px] font-semibold text-muted">Access Tier</th>
-                <th className="bg-paper-raised px-4 py-3 text-left font-mono text-[13px] font-semibold text-muted">Protocol Status</th>
-                <th className="bg-paper-raised px-4 py-3 text-right font-mono text-[13px] font-semibold text-muted">Reads</th>
-                <th className="bg-paper-raised px-4 py-3 text-left font-mono text-[13px] font-semibold text-muted">Date</th>
-                <th className="bg-paper-raised px-4 py-3 text-right font-mono text-[13px] font-semibold text-muted">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {articles.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="rounded-md border-0 border-dashed border-line p-6 text-center text-[15px] text-muted">
-                    No manuscripts yet.{" "}
-                    <a href="/write" className="text-amber">Write one →</a>
-                  </td>
-                </tr>
-              )}
-              {articles.map((a) => (
-                  <tr key={a.key} className="hover:bg-paper-raised/50">
-                   <td className="border-t border-line px-4 py-3.5 align-middle">
-                    <div className="font-display text-[18px] font-semibold">{a.title}</div>
-                    <div className="font-mono text-[13px] text-muted">
-                      bzz://{short(a.swarmRef, 4)} · {readTime(a)}
-                    </div>
-                  </td>
-                   <td className="border-t border-line px-4 py-3.5 align-middle">
-                    <Badge tier={a.premium ? "premium" : "public"} icon={a.premium ? "lock" : "public"}>
-                      {a.premium ? "Premium" : "Public"}
-                    </Badge>
-                  </td>
-                   <td className="border-t border-line px-4 py-3.5 align-middle">
-                    <Badge tier="status" status="published" icon="check_circle">
-                      Published
-                    </Badge>
-                  </td>
-                   <td className="border-t border-line px-4 py-3.5 align-middle font-mono text-right">—</td>
-                   <td className="border-t border-line px-4 py-3.5 align-middle text-body-sm text-muted">{formatDate(a.publishedAt)}</td>
-                   <td className="border-t border-line px-4 py-3.5 align-middle text-right">
-                    <div className="flex justify-end gap-2">
-                       <button className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-transparent px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink transition active:scale-[0.98] hover:bg-paper-raised">Edit</button>
-                      <button
-                         className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-line bg-paper-card px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink transition active:scale-[0.98] hover:bg-paper-raised"
-                        onClick={() => navigator.clipboard?.writeText(a.swarmRef)}
-                      >
-                        <Icon name="query_stats" size={14} /> Analytics
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-none border border-line bg-paper-raised p-6">
-            <span className="font-mono text-[13px] text-muted">
-              Showing {articles.length} of {articles.length} manuscripts
-            </span>
-            <div className="flex gap-2">
-               <button className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-line bg-paper-card px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink transition active:scale-[0.98] hover:bg-paper-raised disabled:cursor-not-allowed disabled:opacity-55" disabled>Previous</button>
-               <button className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-line bg-paper-card px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink transition active:scale-[0.98] hover:bg-paper-raised">Next</button>
-            </div>
-          </div>
-        </div>
-      )}
+      </nav>
 
       {tab === "overview" && (
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_1fr]">
           <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
-            <span className="inline-flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-amber">Storage Postage Batch</span>
-            <div className="font-display text-headline-sm my-3">Batch ID: #88219-F</div>
-            <p className="text-body-sm text-muted">
-              Batch depth: 22. Estimated pin longevity: 142 days until next top-up
-              via Avalanche contract.
-            </p>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-paper-raised">
-              <div className="h-full w-[78%] bg-honey" />
+            <SectionHeading title="Publication activity" />
+            {latest ? (
+              <div className="mt-6 flex items-start gap-4 border-t border-line pt-5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-honey/20 text-honey">
+                  <Icon name="draw" size={20} />
+                </div>
+                <div>
+                  <p className="text-[15px] font-semibold text-ink">Latest article published</p>
+                  <p className="mt-1 text-body-sm text-muted">{latest.title} · {formatDate(latest.publishedAt)}</p>
+                </div>
+              </div>
+            ) : (
+              <EmptyState title="No publication activity yet" body="Your signed article history will appear here." href="/write" />
+            )}
+          </div>
+          <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
+            <SectionHeading title="Protocol status" />
+            <div className="mt-6 space-y-3">
+              <StatusRow label="Wallet session" value="Authenticated" />
+              <StatusRow label="Article signatures" value={ownedArticles.length ? "Verified" : "Waiting"} />
+              <StatusRow label="Arkiv registry" value={status === "error" ? "Unavailable" : "Online"} warning={status === "error"} />
+              <StatusRow label="Swarm content" value={ownedArticles.length ? "Referenced" : "Waiting"} />
             </div>
           </div>
-          <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
-            <span className="inline-flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-sage">
-              ENS Reverse Resolution
-            </span>
-            <div className="font-display text-headline-sm my-3">theautumnapiary.eth</div>
-            <p className="text-body-sm text-muted">
-              Direct contenthash mapped to latest Swarm manifest. Resolves across
-              all Web3 gateways.
-            </p>
-            <span className="mt-3 inline-flex items-center gap-1.5 rounded-sm bg-sage-soft px-2.5 py-0.5 font-mono text-[13px] text-[#3f5a26]">
-              Valid · DNS synced
-            </span>
-          </div>
-          <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
-            <span className="inline-flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-amber">Patron Split Ratio</span>
-            <div className="font-display text-headline-sm my-3">85% / 15%</div>
-            <p className="text-body-sm text-muted">
-              85% to core publication vault, 15% earmarked for guest
-              peer-reviewers and translators.
-            </p>
-            <span className="mt-3 inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">Multisig: 0x228…9a41</span>
-          </div>
         </div>
       )}
 
-      {tab === "reviews" && (
-        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
-          <h3 className="font-display text-title-lg mt-0">Community Submissions (3)</h3>
-          <p className="text-body-sm text-muted">
-            Manuscripts submitted by verified guild authors awaiting editorial seal.
-          </p>
-        </div>
-      )}
-
-      {tab === "contributors" && (
-        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
-          <h3 className="font-display text-title-lg mt-0">Publication Contributors (4)</h3>
-          <p className="text-body-sm text-muted">
-            Authors and peer curators with co-signing privileges via multisig.
-          </p>
-        </div>
+      {tab === "articles" && (
+        <section className="mt-5 overflow-hidden rounded-lg border border-line bg-paper-card shadow-card">
+          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line p-6">
+            <div>
+              <SectionHeading title="Your articles" />
+              <p className="mt-2 text-body-sm text-muted">Only publications signed by this wallet are shown.</p>
+            </div>
+            {status === "loading" && <span className="font-mono text-[12px] text-muted">Refreshing…</span>}
+          </div>
+          {ownedArticles.length === 0 ? (
+            <div className="p-8">
+              <EmptyState title="Nothing published from this wallet" body="Write and sign your first article to populate the ledger." href="/write" />
+            </div>
+          ) : (
+            <div className="divide-y divide-line">
+              {ownedArticles.map((article) => (
+                <div key={article.key} className="flex flex-wrap items-center justify-between gap-4 p-5 transition hover:bg-paper-raised/50 sm:px-6">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <a href={`/article/${article.swarmRef}`} className="truncate font-display text-[20px] font-semibold hover:text-honey">
+                        {article.title}
+                      </a>
+                      <Badge tier={article.premium ? "premium" : "public"} icon={article.premium ? "lock" : "public"}>
+                        {article.premium ? "Premium" : "Public"}
+                      </Badge>
+                    </div>
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[12px] text-muted">
+                      <span>{formatDate(article.publishedAt)}</span>
+                      <span>{readTime(article)}</span>
+                      <span>Swarm {short(article.swarmRef, 5)}</span>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Button href={`/article/${article.swarmRef}`} variant="outline" size="sm" icon="open_in_new">Read</Button>
+                    <Button variant="ghost" size="sm" icon={copied === article.swarmRef ? "check" : "content_copy"} onClick={() => void copyReference(article.swarmRef)}>
+                      {copied === article.swarmRef ? "Copied" : "Reference"}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
       {tab === "settings" && (
-        <div className="max-w-2xl rounded-lg border border-line bg-paper-card p-6 shadow-card">
-          <h3 className="font-display text-title-lg mt-0">
-            Decentralized Publication Settings
-          </h3>
-          <p className="text-body-sm text-muted">
-            Configure your sovereign distribution parameters, auto-archive
-            frequencies, and gated subscription fees.
-          </p>
-          <div className="mb-4 mt-4 flex flex-col gap-1.5">
-            <label className="text-[14px] font-semibold tracking-[0.02em] text-ink">Publication Subdomain &amp; ENS Alias</label>
-            <input className="rounded-sm border border-line-strong bg-paper px-3 py-2.5 text-[16px] text-ink transition focus:border-honey focus:bg-paper-card focus:outline-none placeholder:text-[#b7a98f]" defaultValue="theautumnapiary.nectar.eth" />
+        <section className="mt-5 max-w-3xl rounded-lg border border-line bg-paper-card p-6 shadow-card sm:p-7">
+          <SectionHeading title="Identity and provenance" />
+          <div className="mt-6 space-y-4">
+            <div className="rounded-md border border-line bg-paper-raised p-4">
+              <div className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted">Connected wallet</div>
+              <div className="mt-2 break-all font-mono text-[13px] text-ink">{address}</div>
+            </div>
+            <div className="rounded-md border border-line bg-paper-raised p-4">
+              <div className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted">Publication signing</div>
+              <p className="mt-2 text-body-sm leading-relaxed text-muted">
+                Nectar asks this wallet to sign each article before the backend publishes its Arkiv record. An ENS name can be added later without changing the wallet identity.
+              </p>
+            </div>
           </div>
-          <div className="mb-4 flex flex-col gap-1.5">
-            <label className="text-[14px] font-semibold tracking-[0.02em] text-ink">Default Patron Pass Cost (Monthly)</label>
-            <input defaultValue="0.25" className="max-w-[140px] rounded-sm border border-line-strong bg-paper px-3 py-2.5 text-[16px] text-ink transition focus:border-honey focus:bg-paper-card focus:outline-none placeholder:text-[#b7a98f]" />
-          </div>
-          <Button>Save Protocol Parameters</Button>
-        </div>
+        </section>
       )}
+    </div>
+  );
+}
+
+function Metric({ label, value, icon }: { label: string; value: string; icon: string }) {
+  return (
+    <div className="rounded-lg border border-line bg-paper-card p-5 shadow-card">
+      <div className="flex items-center justify-between gap-3 text-label-md text-muted">
+        {label}
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-paper-raised text-ink"><Icon name={icon} size={17} /></span>
+      </div>
+      <div className="font-display mt-4 text-headline-md">{value}</div>
+    </div>
+  );
+}
+
+function SectionHeading({ title }: { title: string }) {
+  return (
+    <h2 className="font-display text-title-lg">{title}</h2>
+  );
+}
+
+function StatusRow({ label, value, warning = false }: { label: string; value: string; warning?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-line pb-3 last:border-0 last:pb-0">
+      <span className="text-body-sm text-muted">{label}</span>
+      <span className={`inline-flex items-center gap-2 font-mono text-[12px] ${warning ? "text-rust" : "text-sage"}`}>
+        <span className={`h-1.5 w-1.5 rounded-full ${warning ? "bg-rust" : "bg-sage"}`} />
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function EmptyState({ title, body, href }: { title: string; body: string; href: string }) {
+  return (
+    <div className="rounded-md border border-dashed border-line-strong bg-paper-raised/50 p-7 text-center">
+      <Icon name="auto_stories" size={24} />
+      <h3 className="font-display mt-3 text-title-lg">{title}</h3>
+      <p className="text-body-sm mt-2 text-muted">{body}</p>
+      <Button href={href} variant="outline" size="sm" icon="add" className="mt-5">Start writing</Button>
     </div>
   );
 }
