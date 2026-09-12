@@ -17,6 +17,7 @@ export interface ArticleSummary {
   historyRef?: string;
   publisherPublicKey?: string;
   imageRef?: string;
+  imageContentType?: string;
   contentLength?: number;
 }
 
@@ -62,6 +63,9 @@ export async function listPublishedArticles(): Promise<ArticleSummary[]> {
       historyRef: strValue(payload.historyRef) || undefined,
       publisherPublicKey: strValue(payload.publisherPublicKey) || undefined,
       imageRef: strValue(payload.imageRef ?? attr("image_ref")) || undefined,
+      imageContentType:
+        strValue(payload.imageContentType ?? attr("image_content_type")) ||
+        undefined,
       contentLength: numberValue(
         payload.contentLength ?? attr("content_length"),
       ),

@@ -16,6 +16,7 @@ export interface ArticleEntityFields {
   historyRef?: string;
   publisherPublicKey?: string;
   imageRef?: string;
+  imageContentType?: string;
   contentLength: number;
   status: string;
   publishedAt: Date;
@@ -53,6 +54,7 @@ export async function createArticleEntity(
       historyRef: fields.historyRef,
       publisherPublicKey: fields.publisherPublicKey,
       imageRef: fields.imageRef,
+      imageContentType: fields.imageContentType,
       contentLength: fields.contentLength,
       status: fields.status,
       publishedAt: fields.publishedAt.toISOString(),
@@ -64,6 +66,7 @@ export async function createArticleEntity(
       creator: str(fields.creator),
       title: str(fields.title),
       image_ref: str(fields.imageRef ?? ""),
+      image_content_type: str(fields.imageContentType ?? ""),
       premium: bool(fields.premium),
       tags: str(fields.tags.join(",")),
       swarm_ref: str(fields.swarmRef),

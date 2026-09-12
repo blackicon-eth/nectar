@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@nectar/domain": "workspace:*",
+    "@nectar/config": "workspace:*",
+    "@nectar/swarm": "workspace:*",
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@tanstack/react-query": "^5.102.8",
     "@x402/core": "^2.25.0",

@@ -43,6 +43,7 @@ export async function publishArticle(
   let historyRef: string | undefined;
   let publisherPublicKey: string | undefined;
   let imageRef: string | undefined;
+  let imageContentType: string | undefined;
 
   if (image) {
     const uploadedImage = await uploadContent({
@@ -52,6 +53,7 @@ export async function publishArticle(
       premium: false,
     });
     imageRef = uploadedImage.reference;
+    imageContentType = image.contentType;
   }
 
   if (input.premium) {
@@ -93,6 +95,7 @@ export async function publishArticle(
     historyRef,
     publisherPublicKey,
     imageRef,
+    imageContentType,
     contentLength: input.content.length,
     status: "published",
     publishedAt: new Date(),

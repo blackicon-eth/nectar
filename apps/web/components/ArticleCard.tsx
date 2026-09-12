@@ -30,7 +30,8 @@ export default function ArticleCard({
 
   if (variant === "featured") {
     return (
-      <article className="flex flex-col gap-2 overflow-hidden rounded-lg border border-line bg-paper-card p-0 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover md:flex-row">
+      <article className="relative flex flex-col gap-2 overflow-hidden rounded-lg border border-line bg-paper-card p-0 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover md:flex-row">
+        <Link href={articleUrl} aria-label={`Read ${article.title}`} className="absolute inset-0 z-20" />
         <div className="relative min-h-[220px] flex-[0_0_42%] overflow-hidden bg-paper-raised md:min-h-[280px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={image} alt={article.title} className="absolute inset-0 h-full w-full object-cover" />
@@ -47,9 +48,7 @@ export default function ArticleCard({
                 {readTime(article)} · {formatDate(article.publishedAt)}
               </span>
             </div>
-            <Link href={articleUrl}>
-              <h2 className="font-display text-headline-lg max-md:text-[32px] max-md:leading-[1.2]">{article.title}</h2>
-            </Link>
+            <h2 className="font-display text-headline-lg pt-3 max-md:text-[32px] max-md:leading-[1.2]">{article.title}</h2>
             <p className="text-body-md mt-1 text-muted">{article.excerpt}</p>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -60,9 +59,6 @@ export default function ArticleCard({
                 </span>
               ))}
             </div>
-              <a className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-honey px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink shadow-card transition active:scale-[0.98] hover:bg-honey-deep" href={articleUrl}>
-              {article.premium ? "Read Article" : "Read"}
-            </a>
           </div>
         </div>
       </article>
@@ -71,7 +67,8 @@ export default function ArticleCard({
 
   if (variant === "horizontal") {
     return (
-      <article className="flex flex-col gap-2 rounded-lg border border-line bg-paper-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover md:flex-row md:items-center md:gap-6">
+      <article className="relative flex flex-col gap-2 rounded-lg border border-line bg-paper-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover md:flex-row md:items-center md:gap-6">
+        <Link href={articleUrl} aria-label={`Read ${article.title}`} className="absolute inset-0 z-20" />
         <div className="h-[100px] flex-[0_0_160px] overflow-hidden rounded-md bg-paper-raised">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={image} alt={article.title} className="h-full w-full object-cover" />
@@ -83,7 +80,7 @@ export default function ArticleCard({
               {readTime(article)} · {formatDate(article.publishedAt)}
             </span>
           </div>
-          <h3 className="font-display text-headline-sm">{article.title}</h3>
+          <h3 className="font-display pt-2 text-headline-sm">{article.title}</h3>
           <p className="line-clamp-2 text-[15px] leading-relaxed text-muted">{article.excerpt}</p>
           <div className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-2 font-mono text-[13px] font-semibold">
@@ -104,15 +101,14 @@ export default function ArticleCard({
   }
 
   return (
-    <article className="flex h-full flex-col justify-between gap-2 rounded-lg border border-line bg-paper-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover">
+    <article className="relative flex h-full flex-col justify-between gap-2 rounded-lg border border-line bg-paper-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover">
+      <Link href={articleUrl} aria-label={`Read ${article.title}`} className="absolute inset-0 z-20" />
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
           {accessBadge}
           <span className="font-mono text-[13px] text-muted">{readTime(article)}</span>
         </div>
-        <Link href={articleUrl} className="pt-4">
-          <h3 className="font-display text-headline-sm">{article.title}</h3>
-        </Link>
+        <h3 className="pt-4 font-display text-headline-sm">{article.title}</h3>
         <p className="text-body-md line-clamp-3 text-muted">{article.excerpt}</p>
       </div>
       <div className="flex flex-col gap-3">

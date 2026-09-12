@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { AnimatePresence, motion } from "motion/react";
 import { MIN_ARTICLE_CHARS } from "@/lib/articles";
 import { FIXED_TAGS } from "@/lib/tags";
 import { useArticles } from "./ArticlesProvider";
@@ -21,6 +22,7 @@ export default function ArticleForm() {
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [premium, setPremium] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -179,6 +181,7 @@ export default function ArticleForm() {
                 </label>
                 <input
                   id="cover-image"
+                  ref={imageInputRef}
                   className="sr-only"
                   type="file"
                   accept="image/*"
@@ -193,12 +196,20 @@ export default function ArticleForm() {
                     setImage(selected);
                   }}
                   disabled={loading}
-                />
-              </div>
-              {image && (
-                <div className="mt-4 flex flex-col gap-3">
+              />
+            </div>
+              <AnimatePresence initial={false}>
+                {image && (
+                  <motion.div
+                    key={image.name}
+                    className="mt-4 flex flex-col gap-3"
+                    initial={false}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -8 }}
+                    transition={{ duration: 0.24, ease: "easeOut" }}
+                  >
                   {imagePreview && (
-                    <div className="h-40 w-full overflow-hidden rounded-md border border-line bg-paper-card">
+                    <div className="h-40 w-full shrink-0 overflow-hidden rounded-md border border-line bg-paper-card">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={imagePreview} alt="Cover image preview" className="h-full w-full object-cover object-top" />
                     </div>
@@ -207,9 +218,22 @@ export default function ArticleForm() {
                     <Icon name="check_circle" size={16} />
                     <span className="truncate">{image.name}</span>
                     <span>({(image.size / 1024 / 1024).toFixed(1)} MB)</span>
+                    <button
+                      type="button"
+                      className="ml-auto inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted transition hover:bg-paper-card hover:text-ink"
+                      aria-label="Remove cover image"
+                      onClick={() => {
+                        setImage(null);
+                        if (imageInputRef.current) imageInputRef.current.value = "";
+                      }}
+                      disabled={loading}
+                    >
+                      <Icon name="close" size={16} />
+                    </button>
                   </div>
-                </div>
-              )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Access control */}

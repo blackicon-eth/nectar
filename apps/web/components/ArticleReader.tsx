@@ -74,7 +74,9 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
   }
 
   const paragraphs = content.split(/\n\s*\n/).filter(Boolean);
-  const image = article.cover ?? coverFor(article.key);
+  const image = article.imageRef
+    ? `/api/images/${article.imageRef}?contentType=${encodeURIComponent(article.imageContentType ?? "")}`
+    : article.cover ?? coverFor(article.key);
 
   return (
     <motion.article
@@ -143,10 +145,6 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
         <aside className="mt-10 border-t border-line pt-5 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
           <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted">Archive reference</div>
           <div className="mt-2 break-all font-mono text-[11px] leading-relaxed text-ink">{reference}</div>
-          <div className="mt-8 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em] text-sage">
-            <Icon name="verified" size={15} />
-            Retrieval complete
-          </div>
           <p className="mt-8 text-[14px] leading-relaxed text-muted">This public record is served from the decentralized Swarm archive.</p>
         </aside>
       </div>

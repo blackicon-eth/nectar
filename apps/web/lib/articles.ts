@@ -16,6 +16,7 @@ export interface Article {
   historyRef?: string;
   publisherPublicKey?: string;
   imageRef?: string;
+  imageContentType?: string;
   cover?: string;
   contentLength?: number;
 }
