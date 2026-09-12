@@ -25,9 +25,34 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nectar",
+  title: {
+    default: "Nectar",
+    template: "%s | Nectar",
+  },
+  applicationName: "Nectar",
   description:
-    "Creator-first publishing on ENSv2, Avalanche, Arkiv and Swarm.",
+    "Discover and publish independent writing with verifiable provenance onchain.",
+  keywords: [
+    "Nectar",
+    "independent publishing",
+    "onchain publishing",
+    "decentralized writing",
+    "Arkiv",
+    "Swarm",
+  ],
+  openGraph: {
+    title: "Nectar | Independent publishing onchain",
+    description:
+      "Discover and publish independent writing with verifiable provenance onchain.",
+    siteName: "Nectar",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Nectar | Independent publishing onchain",
+    description:
+      "Discover and publish independent writing with verifiable provenance onchain.",
+  },
 };
 
 export default function RootLayout({

@@ -24,7 +24,7 @@ export default function NavBar() {
           aria-label="Nectar home"
           className="justify-self-start"
         >
-          <Logo height={36} />
+          <Logo height={40} />
         </Link>
 
         <div className="flex items-center gap-1 justify-self-center">

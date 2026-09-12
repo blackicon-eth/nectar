@@ -2,7 +2,7 @@ import Logo from "./Logo";
 
 export default function Footer() {
   return (
-    <footer className="bg-wood py-4 text-cream">
+    <footer className="relative z-50 bg-wood py-4 text-cream">
       <div className="flex w-full flex-wrap items-center justify-between gap-4 px-8 md:px-12">
         <div className="rounded-md bg-paper px-3 py-1">
           <Logo height={22} />

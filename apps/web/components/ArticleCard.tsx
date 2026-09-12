@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Article } from "@/lib/articles";
-import { formatDate, readTime, short } from "@/lib/articles";
+import { formatDate, readTime } from "@/lib/articles";
 import { coverFor } from "@/lib/covers";
 import Avatar from "./ui/Avatar";
 import Badge from "./ui/Badge";
@@ -104,38 +104,37 @@ export default function ArticleCard({
   }
 
   return (
-    <article className="flex flex-col gap-2 rounded-lg border border-line bg-paper-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover">
-      <div className="flex items-center justify-between gap-2">
-        {accessBadge}
-        <span className="font-mono text-[13px] text-muted">{readTime(article)}</span>
-      </div>
-        <Link href={articleUrl}>
-        <h3 className="font-display text-headline-sm">{article.title}</h3>
-      </Link>
-      <p className="line-clamp-3 text-[15px] leading-relaxed text-muted">{article.excerpt}</p>
-      <div className="flex flex-wrap gap-1.5">
-        {tags.slice(0, 3).map((t) => (
-          <span key={t} className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">
-            #{t}
-          </span>
-        ))}
-      </div>
-      <div className="flex items-center justify-between gap-2 border-t border-line pt-3">
-        <span className="flex items-center gap-1.5">
-          <Avatar size={20} name={article.creator} />
-          <span className="font-mono text-[13px] text-muted">
-            {article.creatorEnsName || article.creator}
-          </span>
-        </span>
-        <span className="font-mono text-[13px] text-muted">
-          {formatDate(article.publishedAt)}
-        </span>
-      </div>
-      {article.historyRef && (
-        <div className="font-mono text-[12px] text-muted">
-          swarm {short(article.swarmRef, 6)}
+    <article className="flex h-full flex-col justify-between gap-2 rounded-lg border border-line bg-paper-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          {accessBadge}
+          <span className="font-mono text-[13px] text-muted">{readTime(article)}</span>
         </div>
-      )}
+        <Link href={articleUrl} className="pt-4">
+          <h3 className="font-display text-headline-sm">{article.title}</h3>
+        </Link>
+        <p className="text-body-md line-clamp-3 text-muted">{article.excerpt}</p>
+      </div>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap gap-1.5">
+          {tags.slice(0, 3).map((t) => (
+            <span key={t} className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">
+              #{t}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center justify-between gap-2 border-t border-line pt-3">
+          <span className="flex items-center gap-1.5">
+            <Avatar size={20} name={article.creator} />
+            <span className="font-mono text-[13px] text-muted">
+              {article.creatorEnsName || article.creator}
+            </span>
+          </span>
+          <span className="font-mono text-[13px] text-muted">
+            {formatDate(article.publishedAt)}
+          </span>
+        </div>
+      </div>
     </article>
   );
 }
