@@ -3,6 +3,8 @@ import { JetBrains_Mono, Newsreader, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/ui/NavBar";
 import Footer from "@/components/ui/Footer";
+import PageTransition from "@/components/PageTransition";
+import ArticlesProvider from "@/components/ArticlesProvider";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -42,7 +44,9 @@ export default function RootLayout({
       </head>
       <body>
         <NavBar />
-        {children}
+        <ArticlesProvider>
+          <PageTransition>{children}</PageTransition>
+        </ArticlesProvider>
         <Footer />
       </body>
     </html>

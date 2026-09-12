@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import type { Article } from "@/lib/articles";
-import { fetchArticles, formatDate, readTime, short } from "@/lib/articles";
+import { useState } from "react";
+import { useArticles } from "@/components/ArticlesProvider";
+import { formatDate, readTime, short } from "@/lib/articles";
 import Avatar from "./ui/Avatar";
 import Badge from "./ui/Badge";
 import Button from "./ui/Button";
@@ -24,20 +24,8 @@ const METRICS = [
 ];
 
 export default function DashboardView() {
-  const [articles, setArticles] = useState<Article[]>([]);
+  const { articles } = useArticles();
   const [tab, setTab] = useState<Tab>("articles");
-
-  const load = useCallback(async () => {
-    try {
-      setArticles(await fetchArticles());
-    } catch {
-      /* noop */
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
 
   const premiumCount = articles.filter((a) => a.premium).length;
   const publicCount = articles.length - premiumCount;
@@ -79,14 +67,14 @@ export default function DashboardView() {
                   The Autumn Apiary
                   <Badge tier="status" icon="verified">Autonomous Pub</Badge>
                 </h2>
-                <div className="font-mono text-[12px] text-muted">
+                <div className="font-mono text-[13px] text-muted">
                   curated by <span className="text-amber">@pippo.nectar.eth</span>
                   <span className="mx-1.5">·</span> Subnet: Casentino-09
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="font-mono text-[12px] text-muted">ARKIV ROOT GRAPH</div>
+              <div className="font-mono text-[13px] text-muted">ARKIV ROOT GRAPH</div>
               <span className="chip mt-1">arkiv://0x9b4a…c82f</span>
             </div>
           </div>
@@ -96,7 +84,7 @@ export default function DashboardView() {
           </p>
         </div>
         <div className="card">
-          <div className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted">
+          <div className="font-mono text-[13px] uppercase tracking-[0.08em] text-muted">
             Harvest Yield (7 Days)
           </div>
           <div className="mt-1 flex items-center gap-2">
@@ -115,7 +103,7 @@ export default function DashboardView() {
               </linearGradient>
             </defs>
           </svg>
-          <div className="flex justify-between font-mono text-[12px] text-muted">
+          <div className="flex justify-between font-mono text-[13px] text-muted">
             <span>Staking Pool: Skep-Vault</span>
             <span className="text-ink">99.8% Uptime</span>
           </div>
@@ -169,7 +157,7 @@ export default function DashboardView() {
             </span>
           </div>
           <div className="font-display text-headline-lg flex items-baseline gap-2">
-            100% <span className="font-mono text-[12px] text-sage">Pinned</span>
+            100% <span className="font-mono text-[13px] text-sage">Pinned</span>
           </div>
           <div className="text-body-sm mt-1 flex items-center gap-1.5 text-muted">
             <span className="status-pip" /> ACT Postage Batches Valid
@@ -217,8 +205,8 @@ export default function DashboardView() {
               {articles.map((a) => (
                 <tr key={a.key}>
                   <td>
-                    <div className="font-display text-[17px] font-semibold">{a.title}</div>
-                    <div className="font-mono text-[12px] text-muted">
+                    <div className="font-display text-[18px] font-semibold">{a.title}</div>
+                    <div className="font-mono text-[13px] text-muted">
                       bzz://{short(a.swarmRef, 4)} · {readTime(a)}
                     </div>
                   </td>
@@ -250,7 +238,7 @@ export default function DashboardView() {
             </tbody>
           </table>
           <div className="panel-raised flex flex-wrap items-center justify-between gap-2 rounded-none">
-            <span className="font-mono text-[12px] text-muted">
+            <span className="font-mono text-[13px] text-muted">
               Showing {articles.length} of {articles.length} manuscripts
             </span>
             <div className="flex gap-2">

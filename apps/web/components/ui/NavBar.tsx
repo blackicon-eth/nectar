@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "motion/react";
 import Logo from "./Logo";
 
 const LINKS = [
@@ -16,32 +17,46 @@ export default function NavBar() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-line bg-paper/90 backdrop-blur-md">
-      <div className="container-page flex items-center justify-between gap-6 py-3.5">
-        <Link href="/" aria-label="Nectar home">
-          <Logo height={26} />
+      <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-6 px-8 py-3 md:px-12">
+        <Link
+          href="/"
+          aria-label="Nectar home"
+          className="justify-self-start"
+        >
+          <Logo height={36} />
         </Link>
-        <div className="flex items-center gap-6">
-          {LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`text-[15px] font-medium transition-colors ${
-                pathname === link.href
-                  ? "text-ink"
-                  : "text-muted hover:text-ink"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <a
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-paper-card px-3.5 py-1.5 font-mono text-[13px] text-ink transition-colors hover:bg-wood hover:text-cream"
-            href="#connect"
-          >
-            <span className="status-pip" />
-            <span>pippo.nectar.eth</span>
-          </a>
+
+        <div className="flex items-center gap-1 justify-self-center">
+          {LINKS.map((link) => {
+            const active = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`relative rounded-full px-4 py-1.5 text-[17px] font-medium transition-colors ${
+                  active ? "text-ink" : "text-muted hover:text-ink"
+                }`}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="navbar-active"
+                    className="absolute inset-0 rounded-full bg-paper-raised shadow-card"
+                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  />
+                )}
+                <span className="relative z-10">{link.label}</span>
+              </Link>
+            );
+          })}
         </div>
+
+        <a
+          className="inline-flex items-center gap-2 justify-self-end rounded-full border border-line bg-paper-card px-3.5 py-1.5 font-mono text-[14px] text-ink transition-colors hover:bg-wood hover:text-cream"
+          href="#connect"
+        >
+          <span className="status-pip" />
+          <span>pippo.nectar.eth</span>
+        </a>
       </div>
     </nav>
   );

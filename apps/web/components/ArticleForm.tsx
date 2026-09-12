@@ -66,7 +66,7 @@ export default function ArticleForm() {
           <a href="/" className="pill" aria-label="Back">
             <Icon name="arrow_back" size={18} />
           </a>
-          <span className="flex items-center gap-2 font-mono text-[12px] text-muted">
+          <span className="flex items-center gap-2 font-mono text-[13px] text-muted">
             <span className="status-pip animate-pulse" />
             Saved to local cache · just now
           </span>
@@ -83,7 +83,7 @@ export default function ArticleForm() {
       <div className="inline-flex items-center gap-3 rounded-full bg-paper-raised px-4 py-2.5 shadow-card">
         <Avatar size={28} name={creator} />
         <span className="text-body-sm text-muted">Writing as</span>
-        <span className="font-mono text-[12px] font-semibold">@{creator}</span>
+        <span className="font-mono text-[13px] font-semibold">@{creator}</span>
         <span className="badge status" style={{ background: "var(--color-sage-soft)", color: "#3f5a26" }}>
           <Icon name="check" size={12} /> Swarm Ready
         </span>
@@ -127,7 +127,7 @@ export default function ArticleForm() {
             </span>
           ))}
           <input
-            className="w-32 rounded-full bg-paper-raised px-3 py-1 font-mono text-[12px] text-ink outline-none"
+            className="w-32 rounded-full bg-paper-raised px-3 py-1 font-mono text-[13px] text-ink outline-none"
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={(e) => {

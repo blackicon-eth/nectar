@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import type { Article } from "@/lib/articles";
-import { fetchArticles } from "@/lib/articles";
+import { useState } from "react";
+import { useArticles } from "@/components/ArticlesProvider";
 import ArticleCard from "./ArticleCard";
 import Avatar from "./ui/Avatar";
 import Button from "./ui/Button";
@@ -29,25 +28,10 @@ const STEWARDS = [
 type Segment = "all" | "public" | "premium";
 
 export default function ExploreView() {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [status, setStatus] = useState<"loading" | "error" | "idle">("loading");
+  const { articles, status, reload } = useArticles();
   const [query, setQuery] = useState("");
   const [segment, setSegment] = useState<Segment>("all");
   const [topic, setTopic] = useState("All Topics");
-
-  const load = useCallback(async () => {
-    setStatus("loading");
-    try {
-      setArticles(await fetchArticles());
-      setStatus("idle");
-    } catch {
-      setStatus("error");
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
 
   const filtered = articles.filter((a) => {
     if (segment === "public" && a.premium) return false;
@@ -111,11 +95,11 @@ export default function ExploreView() {
                   onClick={() => setSegment(s)}
                 >
                   {s === "all" ? "All Articles" : s === "public" ? "Public Readings" : "Premium Harvests"}
-                  <span className="font-mono text-[12px] opacity-70">({counts[s]})</span>
+                  <span className="font-mono text-[13px] opacity-70">({counts[s]})</span>
                 </button>
               ))}
             </div>
-            <span className="flex items-center gap-1.5 font-mono text-[12px] text-muted">
+            <span className="flex items-center gap-1.5 font-mono text-[13px] text-muted">
               <Icon name="hub" size={16} /> Swarm Node Sync: #77419
             </span>
           </div>
@@ -158,17 +142,17 @@ export default function ExploreView() {
                 <span className="chip">{s.region}</span>
               </div>
               <h3 className="font-display text-title-lg mb-1">{s.name}</h3>
-              <span className="font-mono text-[12px] text-muted">{s.handle}</span>
+              <span className="font-mono text-[13px] text-muted">{s.handle}</span>
               <p className="text-body-sm my-3 text-muted">{s.bio}</p>
               <div className="panel-raised mb-4 flex items-center gap-5 px-4 py-2.5">
                 <div>
                   <div className="font-display text-headline-sm font-semibold">{s.articles}</div>
-                  <div className="font-mono text-[12px] text-muted">articles</div>
+                  <div className="font-mono text-[13px] text-muted">articles</div>
                 </div>
                 <div className="h-7 w-px bg-line" />
                 <div>
                   <div className="font-display text-headline-sm font-semibold">{s.subs}</div>
-                  <div className="font-mono text-[12px] text-muted">subscribers</div>
+                  <div className="font-mono text-[13px] text-muted">subscribers</div>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -191,7 +175,7 @@ export default function ExploreView() {
         {status === "error" && (
           <div className="empty">
             Could not load articles.{" "}
-            <Button size="sm" variant="outline" onClick={load}>
+            <Button size="sm" variant="outline" onClick={reload}>
               Retry
             </Button>
           </div>
@@ -207,7 +191,7 @@ export default function ExploreView() {
           ))}
         </div>
         <div className="panel-raised mt-10 flex flex-wrap items-center justify-between gap-3">
-          <span className="font-mono text-[12px] text-muted">
+          <span className="font-mono text-[13px] text-muted">
             Displaying {filtered.length} of {articles.length} · Arkiv Block #19,234,102
           </span>
           <Button variant="outline" icon="history_edu">

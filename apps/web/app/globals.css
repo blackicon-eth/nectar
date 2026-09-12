@@ -43,45 +43,45 @@
   --font-mono: var(--font-jetbrains);
 
   /* Type scale */
-  --text-display: 56px;
+  --text-display: 60px;
   --text-display--line-height: 1.08;
   --text-display--letter-spacing: -0.03em;
   --text-display--font-weight: 600;
 
-  --text-headline-lg: 40px;
+  --text-headline-lg: 44px;
   --text-headline-lg--line-height: 1.2;
   --text-headline-lg--letter-spacing: -0.025em;
   --text-headline-lg--font-weight: 600;
 
-  --text-headline-md: 28px;
+  --text-headline-md: 30px;
   --text-headline-md--line-height: 1.28;
   --text-headline-md--letter-spacing: -0.015em;
   --text-headline-md--font-weight: 600;
 
-  --text-headline-sm: 22px;
+  --text-headline-sm: 24px;
   --text-headline-sm--line-height: 1.36;
   --text-headline-sm--letter-spacing: -0.01em;
   --text-headline-sm--font-weight: 600;
 
-  --text-title-lg: 20px;
+  --text-title-lg: 22px;
   --text-title-lg--line-height: 1.4;
   --text-title-lg--font-weight: 600;
 
-  --text-body-lg: 19px;
+  --text-body-lg: 20px;
   --text-body-lg--line-height: 1.68;
 
-  --text-body-md: 16px;
+  --text-body-md: 17px;
   --text-body-md--line-height: 1.62;
 
-  --text-body-sm: 14px;
+  --text-body-sm: 15px;
   --text-body-sm--line-height: 1.57;
 
-  --text-label-md: 13px;
+  --text-label-md: 14px;
   --text-label-md--line-height: 1.38;
   --text-label-md--letter-spacing: 0.02em;
   --text-label-md--font-weight: 600;
 
-  --text-code-sm: 12px;
+  --text-code-sm: 13px;
   --text-code-sm--line-height: 1.4;
   --text-code-sm--letter-spacing: -0.01em;
   --text-code-sm--font-weight: 500;
@@ -112,6 +112,7 @@
     background: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: 17px;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -150,11 +151,11 @@
 
 @layer components {
   .container-page {
-    @apply mx-auto w-full max-w-[1440px] px-8 md:px-8;
+    @apply mx-auto w-full max-w-[1600px] px-8 md:px-8;
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-1 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-amber;
+    @apply inline-flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-amber;
   }
 
   .eyebrow-dot {
@@ -162,7 +163,7 @@
   }
 
   .btn {
-    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold tracking-wide transition disabled:cursor-not-allowed disabled:opacity-55;
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-semibold tracking-wide transition disabled:cursor-not-allowed disabled:opacity-55;
   }
   .btn:active {
     transform: scale(0.98);
@@ -187,14 +188,14 @@
     @apply border-honey-deep text-honey-deep;
   }
   .btn-sm {
-    @apply px-3.5 py-1.5 text-[12px];
+    @apply px-3.5 py-1.5 text-[13px];
   }
   .btn-block {
     @apply w-full;
   }
 
   .badge {
-    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 font-mono text-[12px] font-semibold;
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 font-mono text-[13px] font-semibold;
   }
   .badge.public {
     @apply bg-sage-soft text-[#3f5a26];
@@ -213,11 +214,11 @@
   }
 
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[12px] text-muted;
+    @apply inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted;
   }
 
   .pill {
-    @apply inline-flex cursor-pointer items-center gap-2 rounded-full bg-paper-raised px-4 py-1.5 text-[13px] font-medium text-muted transition hover:bg-[#ece3d0] hover:text-ink;
+    @apply inline-flex cursor-pointer items-center gap-2 rounded-full bg-paper-raised px-4 py-1.5 text-[14px] font-medium text-muted transition hover:bg-[#ece3d0] hover:text-ink;
   }
   .pill.active {
     @apply bg-wood text-cream;
@@ -243,7 +244,7 @@
   }
 
   .kv {
-    @apply flex items-center justify-between gap-4 border-b border-line px-0 py-2.5 font-mono text-[12px];
+    @apply flex items-center justify-between gap-4 border-b border-line px-0 py-2.5 font-mono text-[13px];
   }
   .kv:last-child {
     @apply border-b-0;
@@ -257,11 +258,11 @@
   }
 
   .empty {
-    @apply rounded-md border border-dashed border-line p-6 text-center text-[14px] text-muted;
+    @apply rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted;
   }
 
   .ledger th {
-    @apply bg-paper-raised px-4 py-3 text-left font-mono text-[12px] font-semibold text-muted;
+    @apply bg-paper-raised px-4 py-3 text-left font-mono text-[13px] font-semibold text-muted;
   }
   .ledger td {
     @apply border-t border-line px-4 py-3.5 align-middle;
@@ -275,19 +276,19 @@
     @apply flex flex-col gap-2 rounded-lg border border-line bg-paper-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover;
   }
   .article-card .excerpt {
-    @apply line-clamp-3 text-[14px] leading-relaxed text-muted;
+    @apply line-clamp-3 text-[15px] leading-relaxed text-muted;
   }
 
   .field {
     @apply mb-4 flex flex-col gap-1.5;
   }
   .field label {
-    @apply text-[13px] font-semibold tracking-[0.02em] text-ink;
+    @apply text-[14px] font-semibold tracking-[0.02em] text-ink;
   }
   .field input,
   .field textarea,
   .field select {
-    @apply rounded-sm border border-line-strong bg-paper px-3 py-2.5 text-[15px] text-ink transition;
+    @apply rounded-sm border border-line-strong bg-paper px-3 py-2.5 text-[16px] text-ink transition;
   }
   .field input:focus,
   .field textarea:focus,
@@ -306,7 +307,7 @@
   }
 
   .result {
-    @apply mt-4 rounded-md border border-line bg-paper-raised p-4 text-[13px];
+    @apply mt-4 rounded-md border border-line bg-paper-raised p-4 text-[14px];
     overflow-wrap: anywhere;
   }
   .result.error {
@@ -359,11 +360,11 @@
 /* Mobile type scale adjustments */
 @media (max-width: 768px) {
   .text-display {
-    font-size: 38px;
+    font-size: 40px;
     line-height: 1.15;
   }
   .text-headline-lg {
-    font-size: 30px;
+    font-size: 32px;
     line-height: 1.2;
   }
 }

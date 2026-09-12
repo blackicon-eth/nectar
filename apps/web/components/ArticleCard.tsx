@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Article } from "@/lib/articles";
 import { formatDate, readTime, short } from "@/lib/articles";
-import { PLACEHOLDER_COVER } from "@/lib/covers";
+import { coverFor } from "@/lib/covers";
 import Avatar from "./ui/Avatar";
 import Badge from "./ui/Badge";
 
@@ -25,7 +25,7 @@ export default function ArticleCard({
   );
 
   const tags = article.tags ?? [];
-  const image = cover ?? article.cover ?? PLACEHOLDER_COVER;
+  const image = cover ?? article.cover ?? coverFor(article.key);
   const serveUrl = `/api/articles/${article.swarmRef}${
     article.premium
       ? `?premium=true&historyRef=${article.historyRef ?? ""}&publisherKey=${article.publisherPublicKey ?? ""}`
@@ -43,11 +43,11 @@ export default function ArticleCard({
         <div className="flex flex-1 flex-col justify-between gap-4 p-6">
           <div>
             <div className="flex items-center justify-between gap-2">
-              <span className="flex items-center gap-2 font-mono text-[12px] font-semibold">
+              <span className="flex items-center gap-2 font-mono text-[13px] font-semibold">
                 <Avatar size={28} name={article.creator} />
                 {article.creatorEnsName || article.creator}
               </span>
-              <span className="font-mono text-[12px] text-muted">
+              <span className="font-mono text-[13px] text-muted">
                 {readTime(article)} · {formatDate(article.publishedAt)}
               </span>
             </div>
@@ -83,14 +83,14 @@ export default function ArticleCard({
         <div className="flex flex-1 flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
             {accessBadge}
-            <span className="font-mono text-[12px] text-muted">
+            <span className="font-mono text-[13px] text-muted">
               {readTime(article)} · {formatDate(article.publishedAt)}
             </span>
           </div>
           <h3 className="font-display text-headline-sm">{article.title}</h3>
           <p className="excerpt line-clamp-2">{article.excerpt}</p>
           <div className="flex items-center justify-between gap-2">
-            <span className="flex items-center gap-2 font-mono text-[12px] font-semibold">
+            <span className="flex items-center gap-2 font-mono text-[13px] font-semibold">
               <Avatar size={22} name={article.creator} />
               {article.creatorEnsName || article.creator}
             </span>
@@ -111,7 +111,7 @@ export default function ArticleCard({
     <article className="article-card">
       <div className="flex items-center justify-between gap-2">
         {accessBadge}
-        <span className="font-mono text-[12px] text-muted">{readTime(article)}</span>
+        <span className="font-mono text-[13px] text-muted">{readTime(article)}</span>
       </div>
       <Link href={serveUrl}>
         <h3 className="font-display text-headline-sm">{article.title}</h3>
@@ -127,16 +127,16 @@ export default function ArticleCard({
       <div className="flex items-center justify-between gap-2 border-t border-line pt-3">
         <span className="flex items-center gap-1.5">
           <Avatar size={20} name={article.creator} />
-          <span className="font-mono text-[12px] text-muted">
+          <span className="font-mono text-[13px] text-muted">
             {article.creatorEnsName || article.creator}
           </span>
         </span>
-        <span className="font-mono text-[12px] text-muted">
+        <span className="font-mono text-[13px] text-muted">
           {formatDate(article.publishedAt)}
         </span>
       </div>
       {article.historyRef && (
-        <div className="font-mono text-[11px] text-muted">
+        <div className="font-mono text-[12px] text-muted">
           swarm {short(article.swarmRef, 6)}
         </div>
       )}
