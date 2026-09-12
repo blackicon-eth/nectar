@@ -8,13 +8,14 @@ export interface ArticleEntityFields {
   creatorEnsName?: string;
   contributor?: string;
   title: string;
+  subtitle: string;
   excerpt: string;
   tags: string[];
   premium: boolean;
-  actProtected: boolean;
   swarmRef: string;
   historyRef?: string;
   publisherPublicKey?: string;
+  imageRef?: string;
   contentLength: number;
   status: string;
   publishedAt: Date;
@@ -41,16 +42,17 @@ export async function createArticleEntity(
   const result = await wallet.createEntity({
     payload: jsonToPayload({
       title: fields.title,
+      subtitle: fields.subtitle,
       excerpt: fields.excerpt,
       tags: fields.tags,
       creator: fields.creator,
       creatorEnsName: fields.creatorEnsName,
       contributor: fields.contributor,
       premium: fields.premium,
-      actProtected: fields.actProtected,
       swarmRef: fields.swarmRef,
       historyRef: fields.historyRef,
       publisherPublicKey: fields.publisherPublicKey,
+      imageRef: fields.imageRef,
       contentLength: fields.contentLength,
       status: fields.status,
       publishedAt: fields.publishedAt.toISOString(),
@@ -61,8 +63,8 @@ export async function createArticleEntity(
       type: str("article"),
       creator: str(fields.creator),
       title: str(fields.title),
+      image_ref: str(fields.imageRef ?? ""),
       premium: bool(fields.premium),
-      act_protected: bool(fields.actProtected),
       tags: str(fields.tags.join(",")),
       swarm_ref: str(fields.swarmRef),
       history_ref: str(fields.historyRef ?? ""),

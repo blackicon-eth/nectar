@@ -4,18 +4,19 @@ import { listArticles } from "@nectar/arkiv";
 export interface ArticleSummary {
   key: string;
   title: string;
+  subtitle: string;
   excerpt: string;
   tags: string[];
   creator: string;
   creatorEnsName?: string;
   contributor?: string;
   premium: boolean;
-  actProtected: boolean;
   status: string;
   publishedAt: string;
   swarmRef: string;
   historyRef?: string;
   publisherPublicKey?: string;
+  imageRef?: string;
   contentLength?: number;
 }
 
@@ -46,13 +47,13 @@ export async function listPublishedArticles(): Promise<ArticleSummary[]> {
     return {
       key: entity.key,
       title: strValue(payload.title ?? attr("title")),
+      subtitle: strValue(payload.subtitle ?? ""),
       excerpt: strValue(payload.excerpt ?? ""),
       tags: strArray(payload.tags ?? attr("tags")),
       creator: strValue(payload.creator ?? attr("creator")),
       creatorEnsName: strValue(payload.creatorEnsName) || undefined,
       contributor: strValue(payload.contributor) || undefined,
       premium: boolValue(payload.premium ?? attr("premium")),
-      actProtected: boolValue(payload.actProtected ?? attr("act_protected")),
       status: strValue(payload.status ?? attr("status")),
       publishedAt: strValue(
         payload.publishedAt ?? attr("publishedAt") ?? "",
@@ -60,6 +61,7 @@ export async function listPublishedArticles(): Promise<ArticleSummary[]> {
       swarmRef: strValue(payload.swarmRef ?? attr("swarm_ref")),
       historyRef: strValue(payload.historyRef) || undefined,
       publisherPublicKey: strValue(payload.publisherPublicKey) || undefined,
+      imageRef: strValue(payload.imageRef ?? attr("image_ref")) || undefined,
       contentLength: numberValue(
         payload.contentLength ?? attr("content_length"),
       ),

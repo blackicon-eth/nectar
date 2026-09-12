@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const MIN_ARTICLE_CHARS = 1000;
+
 export const ArticleStatus = {
   draft: "draft",
   pending_review: "pending_review",
@@ -16,18 +18,24 @@ export const ArticleInputSchema = z.object({
   creatorEnsName: z.string().max(255).optional(),
   contributor: z.string().max(64).optional(),
   title: z.string().min(1).max(200),
-  excerpt: z.string().max(500).optional().default(""),
-  content: z.string().min(1),
+  subtitle: z.string().max(500).optional().default(""),
+  content: z.string().min(MIN_ARTICLE_CHARS),
+  imageRef: z.string().max(255).optional(),
   tags: z.array(z.string().min(1).max(50)).max(10).default([]),
   premium: z.boolean().default(false),
 });
 
 export type ArticleInput = z.infer<typeof ArticleInputSchema>;
 
+export function excerptFromContent(content: string, maxLength = 240): string {
+  const excerpt = content.replace(/\s+/g, " ").trim();
+  if (excerpt.length <= maxLength) return excerpt;
+  return `${excerpt.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
 export interface PublishResult {
   title: string;
   premium: boolean;
-  actProtected: boolean;
   swarmRef: string;
   historyReference?: string;
   publisherPublicKey?: string;

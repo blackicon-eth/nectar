@@ -98,7 +98,7 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
             {article.title}
           </h1>
           <p className="font-display mt-7 max-w-[640px] text-[clamp(1.35rem,2.2vw,2rem)] leading-[1.2] italic text-muted">
-            {article.excerpt}
+            {article.subtitle}
           </p>
           <div className="mt-8 flex flex-wrap gap-2">
             {(article.tags ?? []).map((tag) => (

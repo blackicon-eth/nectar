@@ -6,6 +6,7 @@ import {
 import { publishActContent, uploadContent } from "@nectar/swarm";
 import {
   ArticleInputSchema,
+  excerptFromContent,
   type ArticleInput,
   type PublishResult,
 } from "./article";
@@ -20,8 +21,14 @@ export class PublishError extends Error {
   }
 }
 
+export interface ArticleImage {
+  data: Uint8Array;
+  contentType: string;
+}
+
 export async function publishArticle(
   rawInput: ArticleInput,
+  image?: ArticleImage,
 ): Promise<PublishResult> {
   const input = ArticleInputSchema.parse(rawInput);
   const config = getConfig();
@@ -35,6 +42,17 @@ export async function publishArticle(
   let swarmRef: string;
   let historyRef: string | undefined;
   let publisherPublicKey: string | undefined;
+  let imageRef: string | undefined;
+
+  if (image) {
+    const uploadedImage = await uploadContent({
+      beeUrl: config.swarm.beeUrl,
+      content: image.data,
+      contentType: image.contentType,
+      premium: false,
+    });
+    imageRef = uploadedImage.reference;
+  }
 
   if (input.premium) {
     if (!config.swarm.actPublisherKey) {
@@ -56,6 +74,7 @@ export async function publishArticle(
     const upload = await uploadContent({
       beeUrl: config.swarm.beeUrl,
       content: input.content,
+      contentType: "text/plain",
       premium: false,
     });
     swarmRef = upload.reference;
@@ -66,13 +85,14 @@ export async function publishArticle(
     creatorEnsName: input.creatorEnsName,
     contributor: input.contributor,
     title: input.title,
-    excerpt: input.excerpt,
+    subtitle: input.subtitle,
+    excerpt: excerptFromContent(input.content),
     tags: input.tags,
     premium: input.premium,
-    actProtected: input.premium,
     swarmRef,
     historyRef,
     publisherPublicKey,
+    imageRef,
     contentLength: input.content.length,
     status: "published",
     publishedAt: new Date(),
@@ -87,7 +107,6 @@ export async function publishArticle(
   return {
     title: input.title,
     premium: input.premium,
-    actProtected: input.premium,
     swarmRef,
     historyReference: historyRef,
     publisherPublicKey,

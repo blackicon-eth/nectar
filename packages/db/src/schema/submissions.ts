@@ -10,7 +10,7 @@ export const submissions = sqliteTable("submissions", {
     .references(() => creators.id),
   contributorId: text("contributor_id").references(() => contributors.id),
   title: text("title").notNull(),
-  excerpt: text("excerpt"),
+  subtitle: text("subtitle"),
   content: text("content").notNull(),
   tags: text("tags").notNull().default("[]"),
   premium: integer("premium", { mode: "boolean" }).notNull().default(false),

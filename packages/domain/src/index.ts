@@ -1,11 +1,16 @@
 export {
   ArticleInputSchema,
   ArticleStatus,
+  MIN_ARTICLE_CHARS,
   type ArticleInput,
   type ArticleStatus as ArticleStatusType,
   type PublishResult,
 } from "./article";
-export { publishArticle, PublishError } from "./publishArticle";
+export {
+  publishArticle,
+  PublishError,
+  type ArticleImage,
+} from "./publishArticle";
 export {
   listPublishedArticles,
   type ArticleSummary,

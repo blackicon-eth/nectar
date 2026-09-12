@@ -26,6 +26,7 @@ export default function WalletGate({
       {isConnected ? (
         <motion.div
           key="protected-content"
+          className="h-full"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

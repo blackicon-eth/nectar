@@ -32,7 +32,7 @@ export default function ExploreView() {
       }
     }
     if (debouncedQuery) {
-      const hay = `${a.title} ${a.excerpt} ${a.creator} ${a.tags.join(" ")}`.toLowerCase();
+      const hay = `${a.title} ${a.subtitle} ${a.excerpt} ${a.creator} ${a.tags.join(" ")}`.toLowerCase();
       if (!hay.includes(debouncedQuery.toLowerCase())) return false;
     }
     return true;

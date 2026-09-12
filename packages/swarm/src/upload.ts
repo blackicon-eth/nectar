@@ -8,7 +8,8 @@ export interface SwarmUploadResult {
 
 export interface UploadContentOptions {
   beeUrl: string;
-  content: string;
+  content: string | Uint8Array;
+  contentType?: string;
   premium: boolean;
 }
 
@@ -22,7 +23,9 @@ async function assertOk(res: Response, action: string): Promise<void> {
 export async function uploadContent(
   options: UploadContentOptions,
 ): Promise<SwarmUploadResult> {
-  const headers: Record<string, string> = { "content-type": "text/plain" };
+  const headers: Record<string, string> = {
+    "content-type": options.contentType ?? "text/plain",
+  };
   if (options.premium) {
     headers["swarm-encrypt"] = "true";
   }
@@ -30,7 +33,7 @@ export async function uploadContent(
   const res = await fetch(`${options.beeUrl}/bytes`, {
     method: "POST",
     headers,
-    body: options.content,
+    body: options.content as any,
   });
   await assertOk(res, "upload");
 

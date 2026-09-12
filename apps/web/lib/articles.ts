@@ -1,18 +1,21 @@
+export const MIN_ARTICLE_CHARS = 1000;
+
 export interface Article {
   key: string;
   title: string;
+  subtitle: string;
   excerpt: string;
   tags: string[];
   creator: string;
   creatorEnsName?: string;
   contributor?: string;
   premium: boolean;
-  actProtected: boolean;
   status: string;
   publishedAt: string;
   swarmRef: string;
   historyRef?: string;
   publisherPublicKey?: string;
+  imageRef?: string;
   cover?: string;
   contentLength?: number;
 }

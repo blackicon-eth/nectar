@@ -4,13 +4,32 @@ import {
   listPublishedArticles,
   publishArticle,
   PublishError,
+  type ArticleImage,
 } from "@nectar/domain";
 
 export const runtime = "nodejs";
 
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const isMultipart = request.headers
+      .get("content-type")
+      ?.includes("multipart/form-data");
+    const form = isMultipart ? await request.formData() : null;
+    const body = form
+      ? {
+          creator: String(form.get("creator") ?? ""),
+          title: String(form.get("title") ?? ""),
+          subtitle: String(form.get("subtitle") ?? ""),
+          content: String(form.get("content") ?? ""),
+          tags: String(form.get("tags") ?? "[]"),
+          premium: String(form.get("premium") ?? "false") === "true",
+        }
+      : await request.json();
+    if (form) {
+      body.tags = JSON.parse(body.tags);
+    }
     const parsed = ArticleInputSchema.safeParse(body);
 
     if (!parsed.success) {
@@ -20,7 +39,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await publishArticle(parsed.data);
+    let image: ArticleImage | undefined;
+    const imageEntry = form?.get("image");
+    if (imageEntry instanceof File && imageEntry.size > 0) {
+      if (!imageEntry.type.startsWith("image/")) {
+        return NextResponse.json(
+          { error: "Cover image must be an image file." },
+          { status: 400 },
+        );
+      }
+      if (imageEntry.size > MAX_IMAGE_BYTES) {
+        return NextResponse.json(
+          { error: "Cover image must be smaller than 5 MB." },
+          { status: 400 },
+        );
+      }
+      image = {
+        data: new Uint8Array(await imageEntry.arrayBuffer()),
+        contentType: imageEntry.type,
+      };
+    }
+
+    const result = await publishArticle(parsed.data, image);
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     if (error instanceof PublishError) {

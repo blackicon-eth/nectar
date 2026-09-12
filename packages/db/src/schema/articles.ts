@@ -10,7 +10,7 @@ export const articles = sqliteTable("articles", {
     .references(() => creators.id),
   contributorId: text("contributor_id").references(() => contributors.id),
   title: text("title").notNull(),
-  excerpt: text("excerpt"),
+  subtitle: text("subtitle"),
   premium: integer("premium", { mode: "boolean" }).notNull().default(false),
   swarmRef: text("swarm_ref").notNull(),
   arkivEntityId: text("arkiv_entity_id"),
