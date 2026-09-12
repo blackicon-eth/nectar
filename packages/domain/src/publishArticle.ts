@@ -3,6 +3,7 @@ import {
   createArticleEntity,
   type ArticleEntityFields,
 } from "@nectar/arkiv";
+import { setPremiumReference } from "@nectar/db";
 import { uploadContent } from "@nectar/swarm";
 import {
   ArticleInputSchema,
@@ -31,18 +32,27 @@ export async function publishArticle(
       "ARKIV_PRIVATE_KEY is not configured. Set it in .env to write article metadata.",
     );
   }
-  if (!config.swarm.postageBatchId) {
-    throw new PublishError(
-      "SWARM_POSTAGE_BATCH_ID is not configured. Set it in .env to store article content.",
-    );
-  }
 
-  const swarmRef = await uploadContent({
+  const upload = await uploadContent({
     beeUrl: config.swarm.beeUrl,
-    postageBatchId: config.swarm.postageBatchId,
     content: input.content,
     premium: input.premium,
   });
+
+  if (input.premium && (!config.turso.url || !config.turso.authToken)) {
+    throw new PublishError(
+      "Premium articles require Turso (TURSO_DATABASE_URL / TURSO_AUTH_TOKEN) to store the content decryption key.",
+    );
+  }
+
+  if (input.premium) {
+    await setPremiumReference(
+      config.turso.url!,
+      config.turso.authToken,
+      upload.contentReference,
+      upload.reference,
+    );
+  }
 
   const fields: ArticleEntityFields = {
     creator: input.creator,
@@ -52,7 +62,7 @@ export async function publishArticle(
     excerpt: input.excerpt,
     tags: input.tags,
     premium: input.premium,
-    swarmRef,
+    swarmRef: upload.contentReference,
     status: "published",
     publishedAt: new Date(),
   };
@@ -66,7 +76,8 @@ export async function publishArticle(
   return {
     title: input.title,
     premium: input.premium,
-    swarmRef,
+    swarmRef: upload.contentReference,
+    premiumReference: input.premium ? upload.reference : undefined,
     arkivEntityKey: entity.entityKey,
     arkivTxHash: entity.txHash,
     publishedAt: fields.publishedAt.toISOString(),

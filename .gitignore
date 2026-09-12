@@ -24,6 +24,9 @@ pnpm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Local notes
+docs/
+
 # Foundry
 packages/contracts/out/
 packages/contracts/cache/

@@ -10,3 +10,8 @@ export {
   listPublishedArticles,
   type ArticleSummary,
 } from "./listArticles";
+export {
+  getArticleContent,
+  ContentUnavailableError,
+  type GetArticleContentOptions,
+} from "./getArticleContent";

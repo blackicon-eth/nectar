@@ -28,6 +28,7 @@ export interface PublishResult {
   title: string;
   premium: boolean;
   swarmRef: string;
+  premiumReference?: string;
   arkivEntityKey: string;
   arkivTxHash: string;
   publishedAt: string;

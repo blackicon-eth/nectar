@@ -6,6 +6,7 @@ export interface ArticleSummary {
   title: string;
   creator: string;
   premium: boolean;
+  swarmRef: string;
 }
 
 export async function listPublishedArticles(): Promise<ArticleSummary[]> {
@@ -23,6 +24,7 @@ export async function listPublishedArticles(): Promise<ArticleSummary[]> {
       title: readString("title"),
       creator: readString("creator"),
       premium: entity.attributes["premium"]?.value === true,
+      swarmRef: readString("swarm_ref"),
     };
   });
 }

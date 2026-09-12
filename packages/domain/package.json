@@ -17,6 +17,7 @@
   "dependencies": {
     "@nectar/arkiv": "workspace:*",
     "@nectar/config": "workspace:*",
+    "@nectar/db": "workspace:*",
     "@nectar/swarm": "workspace:*",
     "zod": "^3.24.1"
   },
