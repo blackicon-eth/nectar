@@ -31,14 +31,14 @@ export default function DashboardView() {
   const publicCount = articles.length - premiumCount;
 
   return (
-    <div className="container-page py-6 pb-10">
+    <div className="mx-auto w-full max-w-[1800px] px-8 py-6 pb-10 md:px-8">
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <span className="eyebrow">
-            <span className="eyebrow-dot" /> Curator Desk · Protocol Epoch 14
+          <span className="inline-flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-amber">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber" /> Curator Desk · Protocol Epoch 14
           </span>
-          <h1 className="font-display text-headline-lg mt-1">
+          <h1 className="font-display text-headline-lg mt-1 max-md:text-[32px] max-md:leading-[1.2]">
             Editorial Ledger<span className="text-honey">.</span>
           </h1>
           <p className="text-body-md mt-2 max-w-2xl text-muted">
@@ -50,7 +50,7 @@ export default function DashboardView() {
           <Button variant="outline" icon="archive">
             Export Publications
           </Button>
-          <a className="btn btn-primary" href="/write">
+          <a className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-honey px-5 py-2.5 text-[14px] font-semibold tracking-wide text-ink shadow-card transition active:scale-[0.98] hover:bg-honey-deep" href="/write">
             <Icon name="add" size={18} /> New Parchment
           </a>
         </div>
@@ -58,7 +58,7 @@ export default function DashboardView() {
 
       {/* Summary bento */}
       <div className="mb-10 grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="card">
+        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <Avatar size={64} name="The Autumn Apiary" />
@@ -75,7 +75,7 @@ export default function DashboardView() {
             </div>
             <div className="text-right">
               <div className="font-mono text-[13px] text-muted">ARKIV ROOT GRAPH</div>
-              <span className="chip mt-1">arkiv://0x9b4a…c82f</span>
+              <span className="mt-1 inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">arkiv://0x9b4a…c82f</span>
             </div>
           </div>
           <p className="text-body-md mt-6 max-w-xl italic text-muted">
@@ -83,7 +83,7 @@ export default function DashboardView() {
             skeps, and the wild nectar flows of Tuscany.”
           </p>
         </div>
-        <div className="card">
+        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
           <div className="font-mono text-[13px] uppercase tracking-[0.08em] text-muted">
             Harvest Yield (7 Days)
           </div>
@@ -113,7 +113,7 @@ export default function DashboardView() {
       {/* Metric cards */}
       <div className="mb-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {METRICS.map((m) => (
-          <div key={m.label} className="card">
+          <div key={m.label} className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
             <div className="mb-2 flex justify-between">
               <span className="text-label-md text-muted">{m.label}</span>
               <span
@@ -123,7 +123,7 @@ export default function DashboardView() {
                 <Icon name={m.icon} size={18} />
               </span>
             </div>
-            <div className="font-display text-headline-lg">{m.value}</div>
+            <div className="font-display text-headline-lg max-md:text-[32px] max-md:leading-[1.2]">{m.value}</div>
             <div className="text-body-sm mt-1 text-muted">
               {m.delta && (
                 <span className="text-sage">
@@ -134,33 +134,33 @@ export default function DashboardView() {
             </div>
           </div>
         ))}
-        <div className="card">
+        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
           <div className="mb-2 flex justify-between">
             <span className="text-label-md text-muted">Published Works</span>
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-paper-raised">
               <Icon name="auto_stories" size={18} />
             </span>
           </div>
-          <div className="font-display text-headline-lg">{articles.length}</div>
+          <div className="font-display text-headline-lg max-md:text-[32px] max-md:leading-[1.2]">{articles.length}</div>
           <div className="text-body-sm mt-1 flex gap-1.5 text-muted">
-            <span className="chip" style={{ background: "rgba(232,163,61,0.2)", color: "var(--color-amber)" }}>
+            <span className="inline-flex items-center gap-1.5 rounded-sm bg-amber/20 px-2.5 py-0.5 font-mono text-[13px] text-amber">
               {premiumCount} Gated
             </span>
-            <span className="chip">{publicCount} Public</span>
+            <span className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">{publicCount} Public</span>
           </div>
         </div>
-        <div className="card">
+        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
           <div className="mb-2 flex justify-between">
             <span className="text-label-md text-muted">Swarm Node Health</span>
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sage-soft">
               <Icon name="hub" size={18} />
             </span>
           </div>
-          <div className="font-display text-headline-lg flex items-baseline gap-2">
+          <div className="font-display text-headline-lg flex items-baseline gap-2 max-md:text-[32px] max-md:leading-[1.2]">
             100% <span className="font-mono text-[13px] text-sage">Pinned</span>
           </div>
           <div className="text-body-sm mt-1 flex items-center gap-1.5 text-muted">
-            <span className="status-pip" /> ACT Postage Batches Valid
+            <span className="inline-block h-2 w-2 rounded-full bg-sage" /> ACT Postage Batches Valid
           </div>
         </div>
       </div>
@@ -170,63 +170,63 @@ export default function DashboardView() {
         {TABS.map((t) => (
           <button
             key={t.id}
-            className={`pill rounded-md${tab === t.id ? " active" : ""}`}
+            className={`inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-1.5 text-[14px] font-medium transition ${tab === t.id ? "bg-wood text-cream" : "bg-paper-raised text-muted hover:bg-[#ece3d0] hover:text-ink"}`}
             onClick={() => setTab(t.id)}
           >
             {t.label}
-            {t.count !== undefined && <span className="chip">{t.count}</span>}
+            {t.count !== undefined && <span className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">{t.count}</span>}
           </button>
         ))}
       </div>
 
       {/* Tab content */}
       {tab === "articles" && (
-        <div className="card overflow-hidden p-0">
-          <table className="ledger w-full">
+        <div className="overflow-hidden rounded-lg border border-line bg-paper-card shadow-card">
+          <table className="w-full">
             <thead>
               <tr>
-                <th>Manuscript Title</th>
-                <th>Access Tier</th>
-                <th>Protocol Status</th>
-                <th className="text-right">Reads</th>
-                <th>Date</th>
-                <th className="text-right">Actions</th>
+                <th className="bg-paper-raised px-4 py-3 text-left font-mono text-[13px] font-semibold text-muted">Manuscript Title</th>
+                <th className="bg-paper-raised px-4 py-3 text-left font-mono text-[13px] font-semibold text-muted">Access Tier</th>
+                <th className="bg-paper-raised px-4 py-3 text-left font-mono text-[13px] font-semibold text-muted">Protocol Status</th>
+                <th className="bg-paper-raised px-4 py-3 text-right font-mono text-[13px] font-semibold text-muted">Reads</th>
+                <th className="bg-paper-raised px-4 py-3 text-left font-mono text-[13px] font-semibold text-muted">Date</th>
+                <th className="bg-paper-raised px-4 py-3 text-right font-mono text-[13px] font-semibold text-muted">Actions</th>
               </tr>
             </thead>
             <tbody>
               {articles.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="empty border-0">
+                  <td colSpan={6} className="rounded-md border-0 border-dashed border-line p-6 text-center text-[15px] text-muted">
                     No manuscripts yet.{" "}
                     <a href="/write" className="text-amber">Write one →</a>
                   </td>
                 </tr>
               )}
               {articles.map((a) => (
-                <tr key={a.key}>
-                  <td>
+                  <tr key={a.key} className="hover:bg-paper-raised/50">
+                   <td className="border-t border-line px-4 py-3.5 align-middle">
                     <div className="font-display text-[18px] font-semibold">{a.title}</div>
                     <div className="font-mono text-[13px] text-muted">
                       bzz://{short(a.swarmRef, 4)} · {readTime(a)}
                     </div>
                   </td>
-                  <td>
+                   <td className="border-t border-line px-4 py-3.5 align-middle">
                     <Badge tier={a.premium ? "premium" : "public"} icon={a.premium ? "lock" : "public"}>
                       {a.premium ? "Premium" : "Public"}
                     </Badge>
                   </td>
-                  <td>
+                   <td className="border-t border-line px-4 py-3.5 align-middle">
                     <Badge tier="status" status="published" icon="check_circle">
                       Published
                     </Badge>
                   </td>
-                  <td className="font-mono text-right">—</td>
-                  <td className="text-body-sm text-muted">{formatDate(a.publishedAt)}</td>
-                  <td className="text-right">
+                   <td className="border-t border-line px-4 py-3.5 align-middle font-mono text-right">—</td>
+                   <td className="border-t border-line px-4 py-3.5 align-middle text-body-sm text-muted">{formatDate(a.publishedAt)}</td>
+                   <td className="border-t border-line px-4 py-3.5 align-middle text-right">
                     <div className="flex justify-end gap-2">
-                      <button className="btn btn-ghost btn-sm">Edit</button>
+                       <button className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-transparent px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink transition active:scale-[0.98] hover:bg-paper-raised">Edit</button>
                       <button
-                        className="btn btn-outline btn-sm"
+                         className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-line bg-paper-card px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink transition active:scale-[0.98] hover:bg-paper-raised"
                         onClick={() => navigator.clipboard?.writeText(a.swarmRef)}
                       >
                         <Icon name="query_stats" size={14} /> Analytics
@@ -237,13 +237,13 @@ export default function DashboardView() {
               ))}
             </tbody>
           </table>
-          <div className="panel-raised flex flex-wrap items-center justify-between gap-2 rounded-none">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-none border border-line bg-paper-raised p-6">
             <span className="font-mono text-[13px] text-muted">
               Showing {articles.length} of {articles.length} manuscripts
             </span>
             <div className="flex gap-2">
-              <button className="btn btn-outline btn-sm" disabled>Previous</button>
-              <button className="btn btn-outline btn-sm">Next</button>
+               <button className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-line bg-paper-card px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink transition active:scale-[0.98] hover:bg-paper-raised disabled:cursor-not-allowed disabled:opacity-55" disabled>Previous</button>
+               <button className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-line bg-paper-card px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink transition active:scale-[0.98] hover:bg-paper-raised">Next</button>
             </div>
           </div>
         </div>
@@ -251,8 +251,8 @@ export default function DashboardView() {
 
       {tab === "overview" && (
         <div className="grid gap-6 md:grid-cols-3">
-          <div className="card">
-            <span className="eyebrow">Storage Postage Batch</span>
+          <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
+            <span className="inline-flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-amber">Storage Postage Batch</span>
             <div className="font-display text-headline-sm my-3">Batch ID: #88219-F</div>
             <p className="text-body-sm text-muted">
               Batch depth: 22. Estimated pin longevity: 142 days until next top-up
@@ -262,8 +262,8 @@ export default function DashboardView() {
               <div className="h-full w-[78%] bg-honey" />
             </div>
           </div>
-          <div className="card">
-            <span className="eyebrow" style={{ color: "var(--color-sage)" }}>
+          <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
+            <span className="inline-flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-sage">
               ENS Reverse Resolution
             </span>
             <div className="font-display text-headline-sm my-3">theautumnapiary.eth</div>
@@ -271,24 +271,24 @@ export default function DashboardView() {
               Direct contenthash mapped to latest Swarm manifest. Resolves across
               all Web3 gateways.
             </p>
-            <span className="chip mt-3" style={{ background: "var(--color-sage-soft)", color: "#3f5a26" }}>
+            <span className="mt-3 inline-flex items-center gap-1.5 rounded-sm bg-sage-soft px-2.5 py-0.5 font-mono text-[13px] text-[#3f5a26]">
               Valid · DNS synced
             </span>
           </div>
-          <div className="card">
-            <span className="eyebrow">Patron Split Ratio</span>
+          <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
+            <span className="inline-flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-amber">Patron Split Ratio</span>
             <div className="font-display text-headline-sm my-3">85% / 15%</div>
             <p className="text-body-sm text-muted">
               85% to core publication vault, 15% earmarked for guest
               peer-reviewers and translators.
             </p>
-            <span className="chip mt-3">Multisig: 0x228…9a41</span>
+            <span className="mt-3 inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">Multisig: 0x228…9a41</span>
           </div>
         </div>
       )}
 
       {tab === "reviews" && (
-        <div className="card">
+        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
           <h3 className="font-display text-title-lg mt-0">Community Submissions (3)</h3>
           <p className="text-body-sm text-muted">
             Manuscripts submitted by verified guild authors awaiting editorial seal.
@@ -297,7 +297,7 @@ export default function DashboardView() {
       )}
 
       {tab === "contributors" && (
-        <div className="card">
+        <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
           <h3 className="font-display text-title-lg mt-0">Publication Contributors (4)</h3>
           <p className="text-body-sm text-muted">
             Authors and peer curators with co-signing privileges via multisig.
@@ -306,7 +306,7 @@ export default function DashboardView() {
       )}
 
       {tab === "settings" && (
-        <div className="card max-w-2xl">
+        <div className="max-w-2xl rounded-lg border border-line bg-paper-card p-6 shadow-card">
           <h3 className="font-display text-title-lg mt-0">
             Decentralized Publication Settings
           </h3>
@@ -314,13 +314,13 @@ export default function DashboardView() {
             Configure your sovereign distribution parameters, auto-archive
             frequencies, and gated subscription fees.
           </p>
-          <div className="field mt-4">
-            <label>Publication Subdomain &amp; ENS Alias</label>
-            <input defaultValue="theautumnapiary.nectar.eth" />
+          <div className="mb-4 mt-4 flex flex-col gap-1.5">
+            <label className="text-[14px] font-semibold tracking-[0.02em] text-ink">Publication Subdomain &amp; ENS Alias</label>
+            <input className="rounded-sm border border-line-strong bg-paper px-3 py-2.5 text-[16px] text-ink transition focus:border-honey focus:bg-paper-card focus:outline-none placeholder:text-[#b7a98f]" defaultValue="theautumnapiary.nectar.eth" />
           </div>
-          <div className="field">
-            <label>Default Patron Pass Cost (Monthly)</label>
-            <input defaultValue="0.25" className="max-w-[140px]" />
+          <div className="mb-4 flex flex-col gap-1.5">
+            <label className="text-[14px] font-semibold tracking-[0.02em] text-ink">Default Patron Pass Cost (Monthly)</label>
+            <input defaultValue="0.25" className="max-w-[140px] rounded-sm border border-line-strong bg-paper px-3 py-2.5 text-[16px] text-ink transition focus:border-honey focus:bg-paper-card focus:outline-none placeholder:text-[#b7a98f]" />
           </div>
           <Button>Save Protocol Parameters</Button>
         </div>

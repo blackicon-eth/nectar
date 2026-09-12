@@ -34,7 +34,7 @@ export default function ArticleCard({
 
   if (variant === "featured") {
     return (
-      <article className="article-card overflow-hidden p-0 md:flex-row">
+      <article className="flex flex-col gap-2 overflow-hidden rounded-lg border border-line bg-paper-card p-0 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover md:flex-row">
         <div className="relative min-h-[220px] flex-[0_0_42%] overflow-hidden bg-paper-raised md:min-h-[280px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={image} alt={article.title} className="absolute inset-0 h-full w-full object-cover" />
@@ -52,19 +52,19 @@ export default function ArticleCard({
               </span>
             </div>
             <Link href={serveUrl}>
-              <h2 className="font-display text-headline-lg">{article.title}</h2>
+              <h2 className="font-display text-headline-lg max-md:text-[32px] max-md:leading-[1.2]">{article.title}</h2>
             </Link>
             <p className="excerpt mt-1">{article.excerpt}</p>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap gap-1.5">
               {tags.map((t) => (
-                <span key={t} className="chip">
+                  <span key={t} className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">
                   #{t}
                 </span>
               ))}
             </div>
-            <a className="btn btn-primary btn-sm" href={serveUrl}>
+              <a className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-honey px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink shadow-card transition active:scale-[0.98] hover:bg-honey-deep" href={serveUrl}>
               {article.premium ? "Read Harvest" : "Read"}
             </a>
           </div>
@@ -75,7 +75,7 @@ export default function ArticleCard({
 
   if (variant === "horizontal") {
     return (
-      <article className="article-card md:flex-row md:items-center md:gap-6">
+      <article className="flex flex-col gap-2 rounded-lg border border-line bg-paper-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover md:flex-row md:items-center md:gap-6">
         <div className="h-[100px] flex-[0_0_160px] overflow-hidden rounded-md bg-paper-raised">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={image} alt={article.title} className="h-full w-full object-cover" />
@@ -88,7 +88,7 @@ export default function ArticleCard({
             </span>
           </div>
           <h3 className="font-display text-headline-sm">{article.title}</h3>
-          <p className="excerpt line-clamp-2">{article.excerpt}</p>
+          <p className="line-clamp-2 text-[15px] leading-relaxed text-muted">{article.excerpt}</p>
           <div className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-2 font-mono text-[13px] font-semibold">
               <Avatar size={22} name={article.creator} />
@@ -96,7 +96,7 @@ export default function ArticleCard({
             </span>
             <div className="flex gap-1.5">
               {tags.slice(0, 2).map((t) => (
-                <span key={t} className="chip">
+                <span key={t} className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">
                   #{t}
                 </span>
               ))}
@@ -108,7 +108,7 @@ export default function ArticleCard({
   }
 
   return (
-    <article className="article-card">
+    <article className="flex flex-col gap-2 rounded-lg border border-line bg-paper-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover">
       <div className="flex items-center justify-between gap-2">
         {accessBadge}
         <span className="font-mono text-[13px] text-muted">{readTime(article)}</span>
@@ -116,10 +116,10 @@ export default function ArticleCard({
       <Link href={serveUrl}>
         <h3 className="font-display text-headline-sm">{article.title}</h3>
       </Link>
-      <p className="excerpt">{article.excerpt}</p>
+      <p className="line-clamp-3 text-[15px] leading-relaxed text-muted">{article.excerpt}</p>
       <div className="flex flex-wrap gap-1.5">
         {tags.slice(0, 3).map((t) => (
-          <span key={t} className="chip">
+          <span key={t} className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">
             #{t}
           </span>
         ))}

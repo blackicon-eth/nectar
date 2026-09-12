@@ -30,15 +30,11 @@ export default function FeedView() {
     <>
       {/* Masthead */}
       <section className="relative overflow-hidden bg-paper-raised/60 py-10">
-        <div className="hero-glow" style={{ top: -128, left: -128, width: 384, height: 384, background: "rgba(232,163,61,0.10)" }} />
-        <div className="hero-glow" style={{ top: 48, right: 0, width: 480, height: 480, background: "rgba(255,184,115,0.18)" }} />
-        <div className="container-page relative z-10 flex flex-wrap items-end justify-between gap-6">
+        <div className="pointer-events-none absolute rounded-full blur-[64px]" style={{ top: -128, left: -128, width: 384, height: 384, background: "rgba(232,163,61,0.10)" }} />
+        <div className="pointer-events-none absolute rounded-full blur-[64px]" style={{ top: 48, right: 0, width: 480, height: 480, background: "rgba(255,184,115,0.18)" }} />
+        <div className="relative z-10 mx-auto flex w-full max-w-[1800px] flex-wrap items-end justify-between gap-6 px-8 md:px-8">
           <div className="max-w-3xl">
-            <span className="eyebrow">
-              <span className="eyebrow-dot" />
-              Dispatch · Volume IX · Autumn Equinox
-            </span>
-            <h1 className="font-display text-display mt-1 max-w-3xl">
+            <h1 className="font-display text-display mt-1 max-w-3xl max-md:text-[40px] max-md:leading-[1.15]">
               Words distilled from <em className="font-normal not-italic text-amber">patience</em> and craft.
             </h1>
             <p className="text-body-lg mt-2 max-w-2xl text-muted">
@@ -56,12 +52,12 @@ export default function FeedView() {
       </section>
 
       {/* Feed grid */}
-      <section className="container-page py-10">
+      <section className="mx-auto w-full max-w-[1800px] px-8 py-10 md:px-8">
         <div className="grid items-start gap-6 lg:grid-cols-[1fr_320px]">
           <div className="flex flex-col gap-6">
-            {status === "loading" && <p className="empty">Harvesting the hive…</p>}
+            {status === "loading" && <p className="rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted">Harvesting the hive…</p>}
             {status === "error" && (
-              <div className="empty">
+              <div className="rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted">
                 Could not load articles.{" "}
                 <Button size="sm" variant="outline" onClick={reload}>
                   Retry
@@ -69,7 +65,7 @@ export default function FeedView() {
               </div>
             )}
             {status === "idle" && articles.length === 0 && (
-              <div className="empty">
+              <div className="rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted">
                 No articles yet.{" "}
                 <a href="/write" className="text-amber">
                   Publish the first one →
@@ -90,7 +86,7 @@ export default function FeedView() {
 
           {/* Sidebar */}
           <aside className="flex flex-col gap-6 pb-20">
-            <div className="card">
+            <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="font-display text-title-lg flex items-center gap-1.5">
                   <Icon name="hive" size={20} fill /> Curator&apos;s Hive
@@ -114,7 +110,7 @@ export default function FeedView() {
               </div>
             </div>
 
-            <div className="card">
+            <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-display text-title-lg flex items-center gap-1.5">
                   <Icon name="trending_up" size={20} /> Trending Hives
@@ -133,7 +129,7 @@ export default function FeedView() {
                         <div className="text-body-sm text-muted">{t.subs}</div>
                       </div>
                     </div>
-                    <button className="pill">Follow</button>
+                    <button className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-paper-raised px-4 py-1.5 text-[14px] font-medium text-muted transition hover:bg-[#ece3d0] hover:text-ink">Follow</button>
                   </div>
                 ))}
               </div>

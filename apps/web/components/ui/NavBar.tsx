@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import Logo from "./Logo";
+import WalletButton from "./ConnectButton";
 
 const LINKS = [
   { href: "/", label: "Feed" },
@@ -50,13 +51,9 @@ export default function NavBar() {
           })}
         </div>
 
-        <a
-          className="inline-flex items-center gap-2 justify-self-end rounded-full border border-line bg-paper-card px-3.5 py-1.5 font-mono text-[14px] text-ink transition-colors hover:bg-wood hover:text-cream"
-          href="#connect"
-        >
-          <span className="status-pip" />
-          <span>pippo.nectar.eth</span>
-        </a>
+        <div className="justify-self-end">
+          <WalletButton />
+        </div>
       </div>
     </nav>
   );

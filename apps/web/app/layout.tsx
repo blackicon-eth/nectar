@@ -5,6 +5,7 @@ import NavBar from "@/components/ui/NavBar";
 import Footer from "@/components/ui/Footer";
 import PageTransition from "@/components/PageTransition";
 import ArticlesProvider from "@/components/ArticlesProvider";
+import Web3Provider from "@/components/Web3Provider";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -43,11 +44,13 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <NavBar />
-        <ArticlesProvider>
-          <PageTransition>{children}</PageTransition>
-        </ArticlesProvider>
-        <Footer />
+        <Web3Provider>
+          <NavBar />
+          <ArticlesProvider>
+            <PageTransition>{children}</PageTransition>
+          </ArticlesProvider>
+          <Footer />
+        </Web3Provider>
       </body>
     </html>
   );

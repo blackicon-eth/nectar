@@ -14,7 +14,7 @@ export default function TopicPill({
   return (
     <button
       type="button"
-      className={`pill${active ? " active" : ""}`}
+      className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-1.5 text-[14px] font-medium transition ${active ? "bg-wood text-cream" : "bg-paper-raised text-muted hover:bg-[#ece3d0] hover:text-ink"}`}
       onClick={onClick}
     >
       {icon && <Icon name={icon} size={16} />}

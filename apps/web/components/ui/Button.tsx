@@ -28,10 +28,14 @@ export default function Button({
   className = "",
 }: ButtonProps) {
   const classes = [
-    "btn",
-    `btn-${variant}`,
-    size === "sm" ? "btn-sm" : "",
-    block ? "btn-block" : "",
+    "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-semibold tracking-wide transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55",
+    variant === "primary" && "bg-honey text-ink shadow-card hover:bg-honey-deep",
+    variant === "dark" && "bg-wood text-cream hover:bg-[#1f1610]",
+    variant === "ghost" && "bg-transparent text-ink hover:bg-paper-raised",
+    variant === "outline" && "border border-line bg-paper-card text-ink hover:bg-paper-raised",
+    variant === "gilded" && "border border-amber text-amber [background:linear-gradient(135deg,#faf5ec_0%,#f3ecdd_100%)] hover:border-honey-deep hover:text-honey-deep",
+    size === "sm" && "px-3.5 py-1.5 text-[13px]",
+    block && "w-full",
     className,
   ]
     .filter(Boolean)

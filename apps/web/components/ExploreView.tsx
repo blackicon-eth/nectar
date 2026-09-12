@@ -58,14 +58,14 @@ export default function ExploreView() {
     <>
       {/* Masthead band */}
       <section className="relative overflow-hidden bg-paper-raised/60 py-10">
-        <div className="hero-glow" style={{ top: -96, right: -80, width: 384, height: 384, background: "rgba(255,221,181,0.25)" }} />
-        <div className="hero-glow" style={{ bottom: -80, left: 40, width: 320, height: 320, background: "rgba(172,210,138,0.2)" }} />
-        <div className="container-page relative z-10 flex flex-col gap-6">
+        <div className="pointer-events-none absolute rounded-full blur-[64px]" style={{ top: -96, right: -80, width: 384, height: 384, background: "rgba(255,221,181,0.25)" }} />
+        <div className="pointer-events-none absolute rounded-full blur-[64px]" style={{ bottom: -80, left: 40, width: 320, height: 320, background: "rgba(172,210,138,0.2)" }} />
+        <div className="relative z-10 mx-auto flex w-full max-w-[1800px] flex-col gap-6 px-8 md:px-8">
           <div>
-            <span className="eyebrow">
-              <span className="eyebrow-dot" /> Arkiv Graph · Swarm Peer Directory
+            <span className="inline-flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-amber">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber" /> Arkiv Graph · Swarm Peer Directory
             </span>
-            <h1 className="font-display text-headline-lg mt-1">The Botanical Index &amp; Dispatches</h1>
+            <h1 className="font-display text-headline-lg mt-1 max-md:text-[32px] max-md:leading-[1.2]">The Botanical Index &amp; Dispatches</h1>
             <p className="text-body-md mt-2 max-w-2xl text-muted">
               Delve into sovereign, cryptographically preserved writing. Curated
               field records, natural philosophies, and tactile memoirs harvested
@@ -74,7 +74,7 @@ export default function ExploreView() {
           </div>
 
           {/* Search */}
-          <div className="card flex items-center gap-3 px-4 py-2.5">
+          <div className="flex items-center gap-3 rounded-lg border border-line bg-paper-card px-4 py-2.5 shadow-card">
             <Icon name="search" size={24} />
             <input
               className="text-body-lg w-full bg-transparent text-ink outline-none placeholder:text-[#b7a98f]"
@@ -82,7 +82,7 @@ export default function ExploreView() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search creators, publications, essays, or Swarm topics..."
             />
-            <span className="chip">⌘K</span>
+            <span className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">⌘K</span>
           </div>
 
           {/* Segment + topics */}
@@ -91,7 +91,7 @@ export default function ExploreView() {
               {(["all", "public", "premium"] as Segment[]).map((s) => (
                 <button
                   key={s}
-                  className={`pill${segment === s ? " active" : ""}`}
+                  className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-1.5 text-[14px] font-medium transition ${segment === s ? "bg-wood text-cream" : "bg-paper-raised text-muted hover:bg-[#ece3d0] hover:text-ink"}`}
                   onClick={() => setSegment(s)}
                 >
                   {s === "all" ? "All Articles" : s === "public" ? "Public Readings" : "Premium Harvests"}
@@ -108,7 +108,7 @@ export default function ExploreView() {
             {TOPICS.map((t) => (
               <button
                 key={t}
-                className={`pill whitespace-nowrap${topic === t ? " active" : ""}`}
+                className={`inline-flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-[14px] font-medium transition ${topic === t ? "bg-wood text-cream" : "bg-paper-raised text-muted hover:bg-[#ece3d0] hover:text-ink"}`}
                 onClick={() => setTopic(t)}
               >
                 {t}
@@ -119,7 +119,7 @@ export default function ExploreView() {
       </section>
 
       {/* Featured stewards */}
-      <section className="container-page pt-10">
+      <section className="mx-auto w-full max-w-[1800px] px-8 pt-10 md:px-8">
         <SectionHeading
           title="Featured Hives & Stewards"
           eyebrow="// verified registries"
@@ -131,7 +131,7 @@ export default function ExploreView() {
         />
         <div className="grid gap-6 md:grid-cols-3">
           {STEWARDS.map((s) => (
-            <div key={s.handle} className="card">
+            <div key={s.handle} className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
               <div className="mb-4 flex justify-between">
                 <div className="relative">
                   <Avatar size={64} name={s.name} />
@@ -139,12 +139,12 @@ export default function ExploreView() {
                     <Icon name={s.icon} size={12} />
                   </span>
                 </div>
-                <span className="chip">{s.region}</span>
+                <span className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">{s.region}</span>
               </div>
               <h3 className="font-display text-title-lg mb-1">{s.name}</h3>
               <span className="font-mono text-[13px] text-muted">{s.handle}</span>
               <p className="text-body-sm my-3 text-muted">{s.bio}</p>
-              <div className="panel-raised mb-4 flex items-center gap-5 px-4 py-2.5">
+              <div className="mb-4 flex items-center gap-5 rounded-lg border border-line bg-paper-raised px-4 py-2.5">
                 <div>
                   <div className="font-display text-headline-sm font-semibold">{s.articles}</div>
                   <div className="font-mono text-[13px] text-muted">articles</div>
@@ -159,7 +159,7 @@ export default function ExploreView() {
                 <Button block icon="workspace_premium">
                   Subscribe · {s.price}
                 </Button>
-                <button className="btn btn-outline" aria-label="Profile">
+                <button className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-line bg-paper-card px-5 py-2.5 text-[14px] font-semibold tracking-wide text-ink transition hover:bg-paper-raised active:scale-[0.98]" aria-label="Profile">
                   <Icon name="person" size={20} />
                 </button>
               </div>
@@ -169,11 +169,11 @@ export default function ExploreView() {
       </section>
 
       {/* Article grid */}
-      <section className="container-page py-10">
+      <section className="mx-auto w-full max-w-[1800px] px-8 py-10 md:px-8">
         <SectionHeading title="Recent Harvests" eyebrow="// showing curated items" />
-        {status === "loading" && <p className="empty">Harvesting the hive…</p>}
+        {status === "loading" && <p className="rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted">Harvesting the hive…</p>}
         {status === "error" && (
-          <div className="empty">
+          <div className="rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted">
             Could not load articles.{" "}
             <Button size="sm" variant="outline" onClick={reload}>
               Retry
@@ -181,7 +181,7 @@ export default function ExploreView() {
           </div>
         )}
         {status === "idle" && filtered.length === 0 && (
-          <div className="empty">
+          <div className="rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted">
             No articles match. <a href="/write" className="text-amber">Publish one →</a>
           </div>
         )}
@@ -190,7 +190,7 @@ export default function ExploreView() {
             <ArticleCard key={a.key} article={a} />
           ))}
         </div>
-        <div className="panel-raised mt-10 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-paper-raised p-6">
           <span className="font-mono text-[13px] text-muted">
             Displaying {filtered.length} of {articles.length} · Arkiv Block #19,234,102
           </span>

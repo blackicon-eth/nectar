@@ -21,7 +21,7 @@ export default function Avatar({
   if (!src) {
     return (
       <span
-        className="avatar avatar-initials"
+        className="flex shrink-0 items-center justify-center rounded-full border border-line bg-amber-soft font-display font-semibold text-amber"
         style={{ width: size, height: size, fontSize: size * 0.38 }}
         aria-label={label}
       >
@@ -33,7 +33,7 @@ export default function Avatar({
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      className="avatar"
+      className="shrink-0 rounded-full border border-line object-cover"
       src={src}
       alt={label}
       width={size}

@@ -11,8 +11,8 @@ export default function Icon({
 }) {
   return (
     <span
-      className={`ms ${fill ? "fill" : ""} ${className}`}
-      style={{ fontSize: size }}
+      className={`inline-block whitespace-nowrap font-["Material_Symbols_Outlined"] leading-none ${className}`}
+      style={{ fontSize: size, fontVariationSettings: `"FILL" ${fill ? 1 : 0}` }}
       aria-hidden="true"
     >
       {name}
