@@ -129,7 +129,7 @@ export default function ArticleForm() {
 
         {/* Content */}
         <textarea
-          className="text-body-lg w-full resize-y bg-transparent leading-relaxed text-ink outline-none"
+          className="text-body-lg w-full resize-none bg-transparent leading-relaxed text-ink outline-none"
           rows={12}
           value={content}
           onChange={(e) => setContent(e.target.value)}
