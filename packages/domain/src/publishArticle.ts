@@ -3,8 +3,7 @@ import {
   createArticleEntity,
   type ArticleEntityFields,
 } from "@nectar/arkiv";
-import { setPremiumReference } from "@nectar/db";
-import { uploadContent } from "@nectar/swarm";
+import { publishActContent, uploadContent } from "@nectar/swarm";
 import {
   ArticleInputSchema,
   type ArticleInput,
@@ -33,25 +32,33 @@ export async function publishArticle(
     );
   }
 
-  const upload = await uploadContent({
-    beeUrl: config.swarm.beeUrl,
-    content: input.content,
-    premium: input.premium,
-  });
-
-  if (input.premium && (!config.turso.url || !config.turso.authToken)) {
-    throw new PublishError(
-      "Premium articles require Turso (TURSO_DATABASE_URL / TURSO_AUTH_TOKEN) to store the content decryption key.",
-    );
-  }
+  let swarmRef: string;
+  let historyRef: string | undefined;
+  let publisherPublicKey: string | undefined;
 
   if (input.premium) {
-    await setPremiumReference(
-      config.turso.url!,
-      config.turso.authToken,
-      upload.contentReference,
-      upload.reference,
-    );
+    if (!config.swarm.actPublisherKey) {
+      throw new PublishError(
+        "SWARM_ACT_PUBLISHER_KEY is not configured. Set it in .env to publish premium (ACT) articles.",
+      );
+    }
+
+    const act = await publishActContent({
+      beeUrl: config.swarm.beeUrl,
+      content: input.content,
+      publisherPrivateKey: config.swarm.actPublisherKey,
+    });
+
+    swarmRef = act.encryptedReference;
+    historyRef = act.historyReference;
+    publisherPublicKey = act.publisherPubKey;
+  } else {
+    const upload = await uploadContent({
+      beeUrl: config.swarm.beeUrl,
+      content: input.content,
+      premium: false,
+    });
+    swarmRef = upload.reference;
   }
 
   const fields: ArticleEntityFields = {
@@ -62,7 +69,10 @@ export async function publishArticle(
     excerpt: input.excerpt,
     tags: input.tags,
     premium: input.premium,
-    swarmRef: upload.contentReference,
+    actProtected: input.premium,
+    swarmRef,
+    historyRef,
+    publisherPublicKey,
     status: "published",
     publishedAt: new Date(),
   };
@@ -76,8 +86,10 @@ export async function publishArticle(
   return {
     title: input.title,
     premium: input.premium,
-    swarmRef: upload.contentReference,
-    premiumReference: input.premium ? upload.reference : undefined,
+    actProtected: input.premium,
+    swarmRef,
+    historyReference: historyRef,
+    publisherPublicKey,
     arkivEntityKey: entity.entityKey,
     arkivTxHash: entity.txHash,
     publishedAt: fields.publishedAt.toISOString(),

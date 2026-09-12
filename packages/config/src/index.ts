@@ -11,6 +11,7 @@ const EnvSchema = z.object({
   ARKIV_ARTICLE_TTL_DAYS: z.coerce.number().int().positive().default(90),
   SWARM_BEE_URL: z.string().url().default("https://api.gateway.ethswarm.org"),
   SWARM_POSTAGE_BATCH_ID: z.string().optional(),
+  SWARM_ACT_PUBLISHER_KEY: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
@@ -28,6 +29,7 @@ export interface AppConfig {
   swarm: {
     beeUrl: string;
     postageBatchId: string | undefined;
+    actPublisherKey: string | undefined;
   };
 }
 
@@ -75,6 +77,7 @@ export function getConfig(): AppConfig {
       swarm: {
         beeUrl: parsed.SWARM_BEE_URL,
         postageBatchId: parsed.SWARM_POSTAGE_BATCH_ID,
+        actPublisherKey: parsed.SWARM_ACT_PUBLISHER_KEY,
       },
     };
   }

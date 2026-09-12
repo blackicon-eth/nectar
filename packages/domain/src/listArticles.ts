@@ -4,9 +4,18 @@ import { listArticles } from "@nectar/arkiv";
 export interface ArticleSummary {
   key: string;
   title: string;
+  excerpt: string;
+  tags: string[];
   creator: string;
+  creatorEnsName?: string;
+  contributor?: string;
   premium: boolean;
+  actProtected: boolean;
+  status: string;
+  publishedAt: string;
   swarmRef: string;
+  historyRef?: string;
+  publisherPublicKey?: string;
 }
 
 export async function listPublishedArticles(): Promise<ArticleSummary[]> {
@@ -14,17 +23,36 @@ export async function listPublishedArticles(): Promise<ArticleSummary[]> {
   const entities = await listArticles({ rpcUrl: config.arkiv.rpcUrl });
 
   return entities.map((entity) => {
-    const readString = (name: string): string => {
-      const attr = entity.attributes[name];
-      return typeof attr?.value === "string" ? (attr.value as string) : "";
-    };
+    const attr = (name: string): unknown => entity.attributes[name]?.value;
+    const payload = entity.payload ?? {};
+
+    const strValue = (value: unknown): string =>
+      typeof value === "string" ? value : "";
+    const boolValue = (value: unknown): boolean => value === true;
+    const strArray = (value: unknown): string[] =>
+      typeof value === "string"
+        ? value.split(",").map((t) => t.trim()).filter(Boolean)
+        : Array.isArray(value)
+          ? value.filter((t): t is string => typeof t === "string")
+          : [];
 
     return {
       key: entity.key,
-      title: readString("title"),
-      creator: readString("creator"),
-      premium: entity.attributes["premium"]?.value === true,
-      swarmRef: readString("swarm_ref"),
+      title: strValue(payload.title ?? attr("title")),
+      excerpt: strValue(payload.excerpt ?? ""),
+      tags: strArray(payload.tags ?? attr("tags")),
+      creator: strValue(payload.creator ?? attr("creator")),
+      creatorEnsName: strValue(payload.creatorEnsName) || undefined,
+      contributor: strValue(payload.contributor) || undefined,
+      premium: boolValue(payload.premium ?? attr("premium")),
+      actProtected: boolValue(payload.actProtected ?? attr("act_protected")),
+      status: strValue(payload.status ?? attr("status")),
+      publishedAt: strValue(
+        payload.publishedAt ?? attr("publishedAt") ?? "",
+      ),
+      swarmRef: strValue(payload.swarmRef ?? attr("swarm_ref")),
+      historyRef: strValue(payload.historyRef) || undefined,
+      publisherPublicKey: strValue(payload.publisherPublicKey) || undefined,
     };
   });
 }

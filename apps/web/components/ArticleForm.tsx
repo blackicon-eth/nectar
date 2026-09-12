@@ -5,7 +5,10 @@ import { useState } from "react";
 interface PublishResult {
   title: string;
   premium: boolean;
+  actProtected: boolean;
   swarmRef: string;
+  historyReference?: string;
+  publisherPublicKey?: string;
   arkivEntityKey: string;
   arkivTxHash: string;
   publishedAt: string;
@@ -137,9 +140,25 @@ export default function ArticleForm() {
             {result.premium ? "yes" : "no"}
           </div>
           <div>
+            <span className="label">Access:</span>{" "}
+            {result.actProtected ? "ACT-protected" : "public"}
+          </div>
+          <div>
             <span className="label">Swarm ref:</span>{" "}
             <span className="mono">{result.swarmRef}</span>
           </div>
+          {result.historyReference && (
+            <div>
+              <span className="label">History ref:</span>{" "}
+              <span className="mono">{result.historyReference}</span>
+            </div>
+          )}
+          {result.publisherPublicKey && (
+            <div>
+              <span className="label">Publisher key:</span>{" "}
+              <span className="mono">{result.publisherPublicKey}</span>
+            </div>
+          )}
           <div>
             <span className="label">Arkiv entity:</span>{" "}
             <span className="mono">{result.arkivEntityKey}</span>

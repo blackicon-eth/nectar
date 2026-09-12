@@ -21,9 +21,12 @@ export function createArkivWalletClient(
   privateKey: string,
   rpcUrl?: string,
 ): WalletArkivClient {
+  const normalized = privateKey.startsWith("0x")
+    ? privateKey
+    : `0x${privateKey}`;
   return createWalletClient({
     chain: tiramisu,
     transport: rpcUrl ? http(rpcUrl) : http(),
-    account: privateKeyToAccount(privateKey as `0x${string}`),
+    account: privateKeyToAccount(normalized as `0x${string}`),
   });
 }

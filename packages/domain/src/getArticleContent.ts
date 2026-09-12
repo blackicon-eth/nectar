@@ -1,6 +1,5 @@
 import { getConfig } from "@nectar/config";
-import { getPremiumReference } from "@nectar/db";
-import { downloadContent } from "@nectar/swarm";
+import { downloadActContent, downloadContent } from "@nectar/swarm";
 
 export class ContentUnavailableError extends Error {
   constructor(message: string) {
@@ -10,17 +9,21 @@ export class ContentUnavailableError extends Error {
 }
 
 export interface GetArticleContentOptions {
-  // The 64-hex content/ciphertext reference stored in Arkiv metadata.
+  // The reference stored in Arkiv metadata. Public: plain content address
+  // (64 hex). Premium: the ACT-encrypted reference (128 hex).
   reference: string;
   premium: boolean;
+  // ACT fields, required when premium.
+  historyReference?: string;
+  publisherPublicKey?: string;
 }
 
 /**
  * Fetch and decrypt (for premium) article content from Swarm.
  *
  * Public: reference is the plain content address.
- * Premium: the reference is the ciphertext address; the full 128-hex
- * reference (which carries the decryption key) is fetched from Turso.
+ * Premium: reference is the ACT-encrypted reference; Nectar resolves it with
+ * the publisher key (SWARM_ACT_PUBLISHER_KEY) and downloads the content.
  *
  * NOTE: premium access control is enforced by the caller via the Arkiv
  * subscription entity (subscriber -> creator -> expiration). This function
@@ -31,28 +34,32 @@ export async function getArticleContent(
 ): Promise<string> {
   const config = getConfig();
 
-  let reference = options.reference;
-
   if (options.premium) {
-    if (!config.turso.url || !config.turso.authToken) {
+    if (!config.swarm.actPublisherKey) {
       throw new ContentUnavailableError(
-        "Turso is not configured; cannot resolve premium content.",
+        "SWARM_ACT_PUBLISHER_KEY is not configured; cannot decrypt premium content.",
       );
     }
-    const fullReference = await getPremiumReference(
-      config.turso.url,
-      config.turso.authToken,
-      options.reference,
-    );
-    if (!fullReference) {
-      throw new ContentUnavailableError("Premium content reference not found.");
+    if (!options.historyReference || !options.publisherPublicKey) {
+      throw new ContentUnavailableError(
+        "Premium content is missing its ACT references.",
+      );
     }
-    reference = fullReference;
+
+    const data = await downloadActContent({
+      beeUrl: config.swarm.beeUrl,
+      encryptedReference: options.reference,
+      historyReference: options.historyReference,
+      publisherPublicKey: options.publisherPublicKey,
+      readerPrivateKeys: [config.swarm.actPublisherKey],
+    });
+
+    return new TextDecoder().decode(data);
   }
 
   const data = await downloadContent({
     beeUrl: config.swarm.beeUrl,
-    reference,
+    reference: options.reference,
   });
 
   return new TextDecoder().decode(data);

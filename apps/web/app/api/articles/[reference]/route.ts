@@ -14,9 +14,17 @@ export async function GET(request: Request, context: RouteContext) {
   const { reference } = await context.params;
   const url = new URL(request.url);
   const premium = url.searchParams.get("premium") === "true";
+  const historyReference = url.searchParams.get("historyRef") ?? undefined;
+  const publisherPublicKey =
+    url.searchParams.get("publisherKey") ?? undefined;
 
   try {
-    const content = await getArticleContent({ reference, premium });
+    const content = await getArticleContent({
+      reference,
+      premium,
+      historyReference,
+      publisherPublicKey,
+    });
     return new NextResponse(content, {
       headers: { "content-type": "text/plain; charset=utf-8" },
     });

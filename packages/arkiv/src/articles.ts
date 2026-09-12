@@ -11,7 +11,10 @@ export interface ArticleEntityFields {
   excerpt: string;
   tags: string[];
   premium: boolean;
+  actProtected: boolean;
   swarmRef: string;
+  historyRef?: string;
+  publisherPublicKey?: string;
   status: string;
   publishedAt: Date;
 }
@@ -43,7 +46,10 @@ export async function createArticleEntity(
       creatorEnsName: fields.creatorEnsName,
       contributor: fields.contributor,
       premium: fields.premium,
+      actProtected: fields.actProtected,
       swarmRef: fields.swarmRef,
+      historyRef: fields.historyRef,
+      publisherPublicKey: fields.publisherPublicKey,
       status: fields.status,
       publishedAt: fields.publishedAt.toISOString(),
     }),
@@ -54,8 +60,11 @@ export async function createArticleEntity(
       creator: str(fields.creator),
       title: str(fields.title),
       premium: bool(fields.premium),
+      act_protected: bool(fields.actProtected),
       tags: str(fields.tags.join(",")),
       swarm_ref: str(fields.swarmRef),
+      history_ref: str(fields.historyRef ?? ""),
+      publisher_public_key: str(fields.publisherPublicKey ?? ""),
       status: str(fields.status),
       published_at_ms: u64(BigInt(fields.publishedAt.getTime())),
     },
@@ -72,6 +81,7 @@ export async function createArticleEntity(
 export interface ListedArticle {
   key: string;
   attributes: Record<string, { type: string; value: unknown }>;
+  payload: Record<string, unknown> | undefined;
 }
 
 export interface ListArticlesOptions {
@@ -98,16 +108,25 @@ export async function listArticles(
   }
 
   const page = await client
-    .select({ key: true, attributes: true })
+    .select({ key: true, attributes: true, payload: true })
     .where(...filters)
     .limit(options.limit ?? 50)
     .fetch();
 
-  return page.entities.map((entity) => ({
-    key: entity.key,
-    attributes: entity.attributes as Record<
-      string,
-      { type: string; value: unknown }
-    >,
-  }));
+  return page.entities.map((entity) => {
+    let payload: Record<string, unknown> | undefined;
+    try {
+      payload = entity.toJson() as Record<string, unknown>;
+    } catch {
+      payload = undefined;
+    }
+    return {
+      key: entity.key,
+      attributes: entity.attributes as Record<
+        string,
+        { type: string; value: unknown }
+      >,
+      payload,
+    };
+  });
 }

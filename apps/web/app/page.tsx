@@ -1,5 +1,4 @@
 import ArticleForm from "@/components/ArticleForm";
-import ArticleList from "@/components/ArticleList";
 
 export default function Home() {
   return (
@@ -12,8 +11,13 @@ export default function Home() {
         on Arkiv.
       </p>
 
+      <p style={{ marginBottom: 24 }}>
+        <a href="/feed" className="link">
+          View the article feed →
+        </a>
+      </p>
+
       <ArticleForm />
-      <ArticleList />
     </main>
   );
 }

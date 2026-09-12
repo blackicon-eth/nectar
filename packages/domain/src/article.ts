@@ -27,8 +27,10 @@ export type ArticleInput = z.infer<typeof ArticleInputSchema>;
 export interface PublishResult {
   title: string;
   premium: boolean;
+  actProtected: boolean;
   swarmRef: string;
-  premiumReference?: string;
+  historyReference?: string;
+  publisherPublicKey?: string;
   arkivEntityKey: string;
   arkivTxHash: string;
   publishedAt: string;
