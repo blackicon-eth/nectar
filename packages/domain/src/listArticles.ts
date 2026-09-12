@@ -8,6 +8,8 @@ export interface ArticleSummary {
   excerpt: string;
   tags: string[];
   creator: string;
+  creatorAddress: string;
+  signature: string;
   creatorEnsName?: string;
   contributor?: string;
   premium: boolean;
@@ -52,6 +54,10 @@ export async function listPublishedArticles(): Promise<ArticleSummary[]> {
       excerpt: strValue(payload.excerpt ?? ""),
       tags: strArray(payload.tags ?? attr("tags")),
       creator: strValue(payload.creator ?? attr("creator")),
+      creatorAddress: strValue(
+        payload.creatorAddress ?? attr("creator_address"),
+      ),
+      signature: strValue(payload.signature ?? attr("signature")),
       creatorEnsName: strValue(payload.creatorEnsName) || undefined,
       contributor: strValue(payload.contributor) || undefined,
       premium: boolValue(payload.premium ?? attr("premium")),

@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "motion/react";
+import { useAccount } from "wagmi";
+import { useSignMessage } from "wagmi";
+import { articleSigningMessage } from "@/lib/articleSigning";
 import { MIN_ARTICLE_CHARS } from "@/lib/articles";
 import { FIXED_TAGS } from "@/lib/tags";
 import { useArticles } from "./ArticlesProvider";
@@ -16,7 +19,9 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export default function ArticleForm() {
   const router = useRouter();
   const { reload } = useArticles();
-  const [creator, setCreator] = useState("pippo.nectar.eth");
+  const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+  const creator = address ?? "";
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [content, setContent] = useState("");
@@ -51,12 +56,23 @@ export default function ArticleForm() {
     setError(null);
     try {
       const formData = new FormData();
-      formData.append("creator", creator);
+       formData.append("creator", "");
+       formData.append("creatorAddress", creator);
       formData.append("title", title);
       formData.append("subtitle", subtitle);
       formData.append("content", content);
       formData.append("tags", JSON.stringify(tags));
-      formData.append("premium", String(premium));
+       formData.append("premium", String(premium));
+       const signature = await signMessageAsync({
+         message: articleSigningMessage({
+           title,
+           subtitle,
+           content,
+           tags,
+           premium,
+         }),
+       });
+       formData.append("signature", signature);
       if (image) formData.append("image", image);
 
       const res = await fetch("/api/articles", {
@@ -265,7 +281,7 @@ export default function ArticleForm() {
         <div className="inline-flex items-center gap-3 justify-self-start rounded-full bg-paper-raised px-4 py-2.5">
           <Avatar size={28} name={creator} />
           <span className="text-body-sm text-muted">Writing as</span>
-          <span className="font-mono text-[13px] font-semibold">@{creator}</span>
+           <span className="font-mono text-[13px] font-semibold">{creator}</span>
         </div>
         <Button
           type="submit"

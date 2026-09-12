@@ -83,6 +83,7 @@ export default function WalletButton() {
               <button
                 type="button"
                 onClick={() => {
+                  void fetch("/api/auth/session", { method: "DELETE" });
                   disconnect();
                   setOpen(false);
                 }}

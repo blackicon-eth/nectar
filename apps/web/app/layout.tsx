@@ -7,6 +7,7 @@ import PageTransition from "@/components/PageTransition";
 import ArticlesProvider from "@/components/ArticlesProvider";
 import Web3Provider from "@/components/Web3Provider";
 import { Toaster } from "sonner";
+import AuthProvider from "@/components/AuthProvider";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -71,7 +72,8 @@ export default function RootLayout({
       </head>
       <body>
         <Web3Provider>
-          <div className="flex h-dvh min-h-screen flex-col overflow-hidden">
+          <AuthProvider>
+            <div className="flex h-dvh min-h-screen flex-col overflow-hidden">
             <NavBar />
             <main className="min-h-0 flex-1 overflow-y-auto">
               <ArticlesProvider>
@@ -80,7 +82,8 @@ export default function RootLayout({
             </main>
             <Footer />
             <Toaster richColors position="top-right" />
-          </div>
+            </div>
+          </AuthProvider>
         </Web3Provider>
       </body>
     </html>

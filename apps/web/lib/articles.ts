@@ -7,6 +7,8 @@ export interface Article {
   excerpt: string;
   tags: string[];
   creator: string;
+  creatorAddress: string;
+  signature: string;
   creatorEnsName?: string;
   contributor?: string;
   premium: boolean;

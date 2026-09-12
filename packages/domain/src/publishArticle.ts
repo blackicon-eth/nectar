@@ -83,7 +83,9 @@ export async function publishArticle(
   }
 
   const fields: ArticleEntityFields = {
-    creator: input.creator,
+    creator: input.creator || input.creatorAddress,
+    creatorAddress: input.creatorAddress,
+    signature: input.signature,
     creatorEnsName: input.creatorEnsName,
     contributor: input.contributor,
     title: input.title,

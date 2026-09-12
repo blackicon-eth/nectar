@@ -5,6 +5,8 @@ import { createArkivWalletClient, createArkivPublicClient } from "./client";
 
 export interface ArticleEntityFields {
   creator: string;
+  creatorAddress: string;
+  signature: string;
   creatorEnsName?: string;
   contributor?: string;
   title: string;
@@ -34,6 +36,28 @@ export interface CreateArticleOptions {
   ttlDays: number;
 }
 
+export interface PatchArticleFields {
+  payload?: Record<string, unknown>;
+  creator?: string;
+  creatorAddress?: string;
+  signature?: string;
+  creatorEnsName?: string;
+  contributor?: string;
+  title?: string;
+  subtitle?: string;
+  excerpt?: string;
+  tags?: string[];
+  premium?: boolean;
+  swarmRef?: string;
+  historyRef?: string;
+  publisherPublicKey?: string;
+  imageRef?: string;
+  imageContentType?: string;
+  contentLength?: number;
+  status?: string;
+  publishedAt?: Date;
+}
+
 export async function createArticleEntity(
   fields: ArticleEntityFields,
   options: CreateArticleOptions,
@@ -47,6 +71,8 @@ export async function createArticleEntity(
       excerpt: fields.excerpt,
       tags: fields.tags,
       creator: fields.creator,
+      creatorAddress: fields.creatorAddress,
+      signature: fields.signature,
       creatorEnsName: fields.creatorEnsName,
       contributor: fields.contributor,
       premium: fields.premium,
@@ -64,6 +90,8 @@ export async function createArticleEntity(
       project: str("nectar"),
       type: str("article"),
       creator: str(fields.creator),
+      creator_address: str(fields.creatorAddress),
+      signature: str(fields.signature),
       title: str(fields.title),
       image_ref: str(fields.imageRef ?? ""),
       image_content_type: str(fields.imageContentType ?? ""),
@@ -83,6 +111,62 @@ export async function createArticleEntity(
     entityKey: result.entityKey,
     txHash: result.txHash,
     expiresAt: result.expiresAt,
+  };
+}
+
+export async function patchArticleEntity(
+  entityKey: string,
+  fields: PatchArticleFields,
+  options: CreateArticleOptions,
+): Promise<{ entityKey: string; txHash: string }> {
+  const wallet = createArkivWalletClient(options.privateKey, options.rpcUrl);
+  const set: Record<string, string | boolean | bigint> = {};
+
+  if (fields.creator !== undefined) set.creator = fields.creator;
+  if (fields.creatorAddress !== undefined) {
+    set.creator_address = fields.creatorAddress;
+  }
+  if (fields.signature !== undefined) set.signature = fields.signature;
+  if (fields.creatorEnsName !== undefined) {
+    set.creatorEnsName = fields.creatorEnsName;
+  }
+  if (fields.contributor !== undefined) set.contributor = fields.contributor;
+  if (fields.title !== undefined) set.title = fields.title;
+  if (fields.subtitle !== undefined) set.subtitle = fields.subtitle;
+  if (fields.excerpt !== undefined) set.excerpt = fields.excerpt;
+  if (fields.tags !== undefined) set.tags = fields.tags.join(",");
+  if (fields.premium !== undefined) set.premium = fields.premium;
+  if (fields.swarmRef !== undefined) set.swarm_ref = fields.swarmRef;
+  if (fields.historyRef !== undefined) set.history_ref = fields.historyRef;
+  if (fields.publisherPublicKey !== undefined) {
+    set.publisher_public_key = fields.publisherPublicKey;
+  }
+  if (fields.imageRef !== undefined) set.image_ref = fields.imageRef;
+  if (fields.imageContentType !== undefined) {
+    set.image_content_type = fields.imageContentType;
+  }
+  if (fields.contentLength !== undefined) {
+    set.content_length = BigInt(fields.contentLength);
+  }
+  if (fields.status !== undefined) set.status = fields.status;
+  if (fields.publishedAt !== undefined) {
+    set.published_at_ms = BigInt(fields.publishedAt.getTime());
+  }
+
+  const result = await wallet.patchEntity({
+    entityKey: entityKey as `0x${string}`,
+    set,
+    ...(fields.payload
+      ? {
+          payload: jsonToPayload(fields.payload),
+          contentType: "application/json",
+        }
+      : {}),
+  });
+
+  return {
+    entityKey: result.entityKey,
+    txHash: result.txHash,
   };
 }
 

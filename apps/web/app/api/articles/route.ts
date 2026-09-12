@@ -6,6 +6,10 @@ import {
   PublishError,
   type ArticleImage,
 } from "@nectar/domain";
+import { articleSigningMessage } from "@/lib/articleSigning";
+import { verifyMessage } from "viem";
+import { cookies } from "next/headers";
+import { getSession, sessionCookieName } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -20,6 +24,8 @@ export async function POST(request: Request) {
     const body = form
       ? {
           creator: String(form.get("creator") ?? ""),
+          creatorAddress: String(form.get("creatorAddress") ?? ""),
+          signature: String(form.get("signature") ?? ""),
           title: String(form.get("title") ?? ""),
           subtitle: String(form.get("subtitle") ?? ""),
           content: String(form.get("content") ?? ""),
@@ -36,6 +42,25 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Invalid input", details: parsed.error.flatten() },
         { status: 400 },
+      );
+    }
+
+    const session = await getSession(
+      (await cookies()).get(sessionCookieName())?.value,
+    );
+    if (!session || session.walletAddress !== parsed.data.creatorAddress.toLowerCase()) {
+      return NextResponse.json({ error: "Sign in with this wallet before publishing." }, { status: 401 });
+    }
+
+    const validSignature = await verifyMessage({
+      address: parsed.data.creatorAddress as `0x${string}`,
+      message: articleSigningMessage(parsed.data),
+      signature: parsed.data.signature as `0x${string}`,
+    });
+    if (!validSignature) {
+      return NextResponse.json(
+        { error: "Article signature does not match the connected wallet." },
+        { status: 401 },
       );
     }
 
