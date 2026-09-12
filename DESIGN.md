@@ -1,5 +1,5 @@
 ---
-name: Artisan Editorial & Harvest Journal
+name: Artisan Editorial Journal
 colors:
   surface: '#fef9f0'
   surface-dim: '#ded9d1'
@@ -148,8 +148,8 @@ The palette draws directly from apiaries, natural flax fiber, and autumnal press
 
 - **Paper Layers:** The foundational viewport uses Base Paper (`#FAF5EC`). Structural framing, side rails, and recessed groupings use Raised Panel (`#F3ECDD`). Interactive reading surfaces and elevated modules employ Card Surface (`#FFFDF6`), bounded by Warm Line Borders (`#E7DCC4`).
 - **Typography & Ink:** Text mimics woodblock ink. Primary reading copy and high-emphasis labels rely on Deep Wood Brown (`#3B2B1F`). Subtitles, metadata, and reading time are rendered in Muted Bark (`#8A7A66`). Dark Wood (`#2E2018`) provides grounding weight in the masthead hero and full-width footer.
-- **Honey & Harvest Accents:** Primary interactions rely on Honey (`#E8A33D`) transitioning to Deep Honey (`#C97F1F`) on hover and active states. Autumn Amber (`#B8742A`) and subtle honey-amber gradients (`linear-gradient(135deg, #E8A33D 0%, #B8742A 100%)`) signify patron-supported and premium publications.
-- **Semantics & Badges:** Foliage Green (`#6B8E4E`) signals public access, verified creator states, and organic distribution. Rust Harvest (`#A6552A`) handles critical alerts, errors, and unconfirmed states without disrupting the organic visual ecosystem.
+- **Honey Accents:** Primary interactions rely on Honey (`#E8A33D`) transitioning to Deep Honey (`#C97F1F`) on hover and active states. Autumn Amber (`#B8742A`) and subtle honey-amber gradients (`linear-gradient(135deg, #E8A33D 0%, #B8742A 100%)`) signify patron-supported and premium publications.
+- **Semantics & Badges:** Foliage Green (`#6B8E4E`) signals public access, verified creator states, and organic distribution. Rust (`#A6552A`) handles critical alerts, errors, and unconfirmed states without disrupting the organic visual ecosystem.
 
 ## Typography
 

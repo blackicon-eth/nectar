@@ -16,7 +16,7 @@ export default function ArticleCard({
 }) {
   const accessBadge = article.premium ? (
     <Badge tier="premium" icon="lock">
-      Premium Harvest
+      Premium Article
     </Badge>
   ) : (
     <Badge tier="public" icon="lock_open_right">
@@ -26,11 +26,7 @@ export default function ArticleCard({
 
   const tags = article.tags ?? [];
   const image = cover ?? article.cover ?? coverFor(article.key);
-  const serveUrl = `/api/articles/${article.swarmRef}${
-    article.premium
-      ? `?premium=true&historyRef=${article.historyRef ?? ""}&publisherKey=${article.publisherPublicKey ?? ""}`
-      : "?premium=false"
-  }`;
+  const articleUrl = `/article/${article.swarmRef}`;
 
   if (variant === "featured") {
     return (
@@ -51,10 +47,10 @@ export default function ArticleCard({
                 {readTime(article)} · {formatDate(article.publishedAt)}
               </span>
             </div>
-            <Link href={serveUrl}>
+            <Link href={articleUrl}>
               <h2 className="font-display text-headline-lg max-md:text-[32px] max-md:leading-[1.2]">{article.title}</h2>
             </Link>
-            <p className="excerpt mt-1">{article.excerpt}</p>
+            <p className="text-body-md mt-1 text-muted">{article.excerpt}</p>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap gap-1.5">
@@ -64,8 +60,8 @@ export default function ArticleCard({
                 </span>
               ))}
             </div>
-              <a className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-honey px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink shadow-card transition active:scale-[0.98] hover:bg-honey-deep" href={serveUrl}>
-              {article.premium ? "Read Harvest" : "Read"}
+              <a className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-honey px-3.5 py-1.5 text-[13px] font-semibold tracking-wide text-ink shadow-card transition active:scale-[0.98] hover:bg-honey-deep" href={articleUrl}>
+              {article.premium ? "Read Article" : "Read"}
             </a>
           </div>
         </div>
@@ -113,7 +109,7 @@ export default function ArticleCard({
         {accessBadge}
         <span className="font-mono text-[13px] text-muted">{readTime(article)}</span>
       </div>
-      <Link href={serveUrl}>
+        <Link href={articleUrl}>
         <h3 className="font-display text-headline-sm">{article.title}</h3>
       </Link>
       <p className="line-clamp-3 text-[15px] leading-relaxed text-muted">{article.excerpt}</p>

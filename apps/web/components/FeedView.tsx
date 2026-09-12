@@ -6,9 +6,10 @@ import Avatar from "./ui/Avatar";
 import Button from "./ui/Button";
 import Icon from "./ui/Icon";
 import TopicPill from "./ui/TopicPill";
+import Spinner from "./ui/Spinner";
 
 const TOPICS = [
-  { label: "Featured Harvests", icon: "auto_awesome", active: true },
+  { label: "Featured Articles", icon: "auto_awesome", active: true },
   { label: "Top Naturalists", icon: "psychology" },
   { label: "Philosophy", icon: "menu_book" },
   { label: "Longform Essays", icon: "ink_pen" },
@@ -39,7 +40,7 @@ export default function FeedView() {
             </h1>
             <p className="text-body-lg mt-2 max-w-2xl text-muted">
               A sanctuary for independent essayists, naturalists, and thinkers.
-              Free public readings preserved alongside gilded premium harvests,
+              Free public readings preserved alongside gilded premium articles,
               immutably recorded.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
@@ -55,7 +56,11 @@ export default function FeedView() {
       <section className="mx-auto w-full max-w-[1800px] px-8 py-10 md:px-8">
         <div className="grid items-start gap-6 lg:grid-cols-[1fr_320px]">
           <div className="flex flex-col gap-6">
-            {status === "loading" && <p className="rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted">Harvesting the hive…</p>}
+            {status === "loading" && (
+              <div className="flex min-h-[220px] items-center justify-center rounded-md border border-dashed border-line bg-paper-card/50 p-6">
+                <Spinner label="Loading articles" />
+              </div>
+            )}
             {status === "error" && (
               <div className="rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted">
                 Could not load articles.{" "}

@@ -1,26 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { short } from "@/lib/articles";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { FIXED_TAGS } from "@/lib/tags";
+import { useArticles } from "./ArticlesProvider";
 import Avatar from "./ui/Avatar";
-import Badge from "./ui/Badge";
 import Button from "./ui/Button";
 import Icon from "./ui/Icon";
 
-interface PublishResult {
-  title: string;
-  premium: boolean;
-  actProtected: boolean;
-  swarmRef: string;
-  historyReference?: string;
-  publisherPublicKey?: string;
-  arkivEntityKey: string;
-  arkivTxHash: string;
-  publishedAt: string;
-}
-
 export default function ArticleForm() {
+  const router = useRouter();
+  const { reload } = useArticles();
   const [creator, setCreator] = useState("pippo.nectar.eth");
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -28,14 +19,12 @@ export default function ArticleForm() {
   const [tags, setTags] = useState<string[]>([]);
   const [premium, setPremium] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<PublishResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setResult(null);
     try {
       const res = await fetch("/api/articles", {
         method: "POST",
@@ -44,9 +33,17 @@ export default function ArticleForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Publish failed");
-      setResult(data as PublishResult);
+      toast.success("Published", { description: "Article is live." });
+      try {
+        await reload();
+      } catch {
+        // The publication succeeded; a later context refresh can recover the list.
+      }
+      router.push(`/article/${data.swarmRef}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Publish failed");
+      const message = err instanceof Error ? err.message : "Publish failed";
+      setError(message);
+      toast.error("Publish failed", { description: message });
     } finally {
       setLoading(false);
     }
@@ -92,6 +89,7 @@ export default function ArticleForm() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Title of your article..."
+          disabled={loading}
           required
         />
         {/* Excerpt */}
@@ -101,6 +99,7 @@ export default function ArticleForm() {
           value={excerpt}
           onChange={(e) => setExcerpt(e.target.value)}
           placeholder="A short excerpt or summary for the feed and reader previews..."
+          disabled={loading}
         />
 
         {/* Tags */}
@@ -118,7 +117,8 @@ export default function ArticleForm() {
                       active ? prev.filter((x) => x !== t) : [...prev, t],
                     )
                   }
-                  className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-1.5 text-[14px] font-medium transition ${active ? "bg-wood text-cream" : "bg-paper-raised text-muted hover:bg-[#ece3d0] hover:text-ink"}`}
+                  disabled={loading}
+                  className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-1.5 text-[14px] font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${active ? "bg-wood text-cream" : "bg-paper-raised text-muted hover:bg-[#ece3d0] hover:text-ink"}`}
                 >
                   #{t}
                 </button>
@@ -134,6 +134,7 @@ export default function ArticleForm() {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="The full article body, stored on Swarm..."
+          disabled={loading}
           required
         />
 
@@ -155,12 +156,13 @@ export default function ArticleForm() {
                 </p>
               </div>
             </div>
-            <label className="relative inline-flex cursor-pointer items-center">
+            <label className={`relative inline-flex items-center ${loading ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
               <input
                 className="peer sr-only"
                 type="checkbox"
                 checked={premium}
                 onChange={(e) => setPremium(e.target.checked)}
+                disabled={loading}
               />
               <span className="relative h-8 w-14 rounded-full bg-line-strong transition-colors after:absolute after:left-1 after:top-1 after:h-6 after:w-6 after:rounded-full after:bg-paper-card after:transition-transform peer-checked:bg-honey peer-checked:after:translate-x-6" />
             </label>
@@ -170,36 +172,6 @@ export default function ArticleForm() {
 
       {error && <div className="mt-4 rounded-md border border-rust bg-paper-raised p-4 text-[14px] text-rust [overflow-wrap:anywhere]">{error}</div>}
 
-      {result && (
-        <section className="mt-6 rounded-lg border border-line bg-paper-card p-6 shadow-card">
-          <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1 font-mono text-[13px] font-medium uppercase tracking-[0.08em] text-amber">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-sage" />
-              Publication Receipt · On-Chain Provenance
-            </span>
-            <Badge tier={result.premium ? "premium" : "public"} icon={result.premium ? "lock" : "lock_open_right"}>
-              {result.premium ? "Premium Gated" : "Public"}
-            </Badge>
-          </div>
-          <h4 className="font-display text-headline-sm my-4">{result.title}</h4>
-          <p className="text-body-sm text-muted">
-            Manifest finalized, decentralized pin established across storage nodes.
-          </p>
-          <div className="mt-4">
-            <div className="flex items-center justify-between gap-4 border-b border-line px-0 py-2.5 font-mono text-[13px]"><span className="text-muted">Swarm Reference</span><span className="break-all text-right font-semibold text-ink">{short(result.swarmRef, 10)}</span></div>
-            {result.historyReference && <div className="flex items-center justify-between gap-4 border-b border-line px-0 py-2.5 font-mono text-[13px]"><span className="text-muted">History Ref</span><span className="break-all text-right font-semibold text-ink">{short(result.historyReference, 10)}</span></div>}
-            {result.publisherPublicKey && <div className="flex items-center justify-between gap-4 border-b border-line px-0 py-2.5 font-mono text-[13px]"><span className="text-muted">Publisher Key</span><span className="break-all text-right font-semibold text-ink">{short(result.publisherPublicKey, 10)}</span></div>}
-            <div className="flex items-center justify-between gap-4 border-b border-line px-0 py-2.5 font-mono text-[13px]"><span className="text-muted">Arkiv Entity</span><span className="break-all text-right font-semibold text-ink">{short(result.arkivEntityKey, 10)}</span></div>
-            <div className="flex items-center justify-between gap-4 px-0 py-2.5 font-mono text-[13px]"><span className="text-muted">Arkiv Tx</span><span className="break-all text-right font-semibold text-ink">{short(result.arkivTxHash, 8)}</span></div>
-          </div>
-          <div className="mt-4 flex justify-end gap-2">
-            <Button variant="outline" icon="link">Copy Gateway Link</Button>
-            <a className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-honey px-5 py-2.5 text-[14px] font-semibold tracking-wide text-ink shadow-card transition active:scale-[0.98] hover:bg-honey-deep" href={`/api/articles/${result.swarmRef}?premium=${result.premium}`}>
-              View Published Article <Icon name="arrow_forward" size={16} />
-            </a>
-          </div>
-        </section>
-      )}
     </div>
   );
 }

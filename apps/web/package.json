@@ -21,6 +21,7 @@
     "next-transition-router": "^0.2.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "sonner": "^2.0.8",
     "viem": "^2.56.3",
     "wagmi": "^2.19.5"
   },

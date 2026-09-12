@@ -19,7 +19,7 @@ const TABS: { id: Tab; label: string; count?: number }[] = [
 ];
 
 const METRICS = [
-  { label: "Patron Base", value: "1,428", delta: "+14%", note: "this harvest cycle", icon: "group", tint: "var(--color-amber-soft)" },
+  { label: "Patron Base", value: "1,428", delta: "+14%", note: "this publishing cycle", icon: "group", tint: "var(--color-amber-soft)" },
   { label: "Monthly Flow", value: "8.4 AVAX", note: "~$260 USD accrued via patronage", icon: "toll", tint: "#ffe6c2" },
 ];
 
@@ -85,7 +85,7 @@ export default function DashboardView() {
         </div>
         <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
           <div className="font-mono text-[13px] uppercase tracking-[0.08em] text-muted">
-            Harvest Yield (7 Days)
+            Article Yield (7 Days)
           </div>
           <div className="mt-1 flex items-center gap-2">
             <span className="font-display text-headline-md">2.41 AVAX</span>

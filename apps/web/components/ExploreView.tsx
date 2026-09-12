@@ -68,7 +68,7 @@ export default function ExploreView() {
             <h1 className="font-display text-headline-lg mt-1 max-md:text-[32px] max-md:leading-[1.2]">The Botanical Index &amp; Dispatches</h1>
             <p className="text-body-md mt-2 max-w-2xl text-muted">
               Delve into sovereign, cryptographically preserved writing. Curated
-              field records, natural philosophies, and tactile memoirs harvested
+              field records, natural philosophies, and tactile memoirs collected
               across the decentralized canopy.
             </p>
           </div>
@@ -94,7 +94,7 @@ export default function ExploreView() {
                   className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-1.5 text-[14px] font-medium transition ${segment === s ? "bg-wood text-cream" : "bg-paper-raised text-muted hover:bg-[#ece3d0] hover:text-ink"}`}
                   onClick={() => setSegment(s)}
                 >
-                  {s === "all" ? "All Articles" : s === "public" ? "Public Readings" : "Premium Harvests"}
+                  {s === "all" ? "All Articles" : s === "public" ? "Public Readings" : "Premium Articles"}
                   <span className="font-mono text-[13px] opacity-70">({counts[s]})</span>
                 </button>
               ))}
@@ -170,8 +170,8 @@ export default function ExploreView() {
 
       {/* Article grid */}
       <section className="mx-auto w-full max-w-[1800px] px-8 py-10 md:px-8">
-        <SectionHeading title="Recent Harvests" eyebrow="// showing curated items" />
-        {status === "loading" && <p className="rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted">Harvesting the hive…</p>}
+              <SectionHeading title="Recent Articles" eyebrow="// showing curated items" />
+        {status === "loading" && <p className="rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted">Loading articles…</p>}
         {status === "error" && (
           <div className="rounded-md border border-dashed border-line p-6 text-center text-[15px] text-muted">
             Could not load articles.{" "}
@@ -195,7 +195,7 @@ export default function ExploreView() {
             Displaying {filtered.length} of {articles.length} · Arkiv Block #19,234,102
           </span>
           <Button variant="outline" icon="history_edu">
-            Load More Harvests
+            Load More Articles
           </Button>
         </div>
       </section>

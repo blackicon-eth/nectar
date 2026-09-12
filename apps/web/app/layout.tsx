@@ -6,6 +6,7 @@ import Footer from "@/components/ui/Footer";
 import PageTransition from "@/components/PageTransition";
 import ArticlesProvider from "@/components/ArticlesProvider";
 import Web3Provider from "@/components/Web3Provider";
+import { Toaster } from "sonner";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -53,6 +54,7 @@ export default function RootLayout({
               </ArticlesProvider>
             </main>
             <Footer />
+            <Toaster richColors position="top-right" />
           </div>
         </Web3Provider>
       </body>
