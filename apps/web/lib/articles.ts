@@ -14,6 +14,7 @@ export interface Article {
   historyRef?: string;
   publisherPublicKey?: string;
   cover?: string;
+  contentLength?: number;
 }
 
 export async function fetchArticles(): Promise<Article[]> {
@@ -32,9 +33,12 @@ export function short(value: string, n = 8): string {
     : `${value.slice(0, n)}…${value.slice(-n)}`;
 }
 
-export function readTime(article: Article): string {
-  const words = `${article.title} ${article.excerpt}`.trim().split(/\s+/).length;
-  return `${Math.max(1, Math.round(words / 200))} min`;
+export function readTime(article: Article, content?: string): string {
+  const characterCount =
+    content?.length ||
+    article.contentLength ||
+    `${article.title} ${article.excerpt}`.trim().length;
+  return `${Math.max(1, Math.ceil(characterCount / 1000))} min read`;
 }
 
 export function formatDate(iso: string): string {

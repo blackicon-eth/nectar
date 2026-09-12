@@ -73,6 +73,7 @@ export async function publishArticle(
     swarmRef,
     historyRef,
     publisherPublicKey,
+    contentLength: input.content.length,
     status: "published",
     publishedAt: new Date(),
   };

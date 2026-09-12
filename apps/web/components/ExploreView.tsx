@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useArticles } from "@/components/ArticlesProvider";
 import { FIXED_TAGS } from "@/lib/tags";
@@ -14,8 +14,14 @@ type Segment = "all" | "public" | "premium";
 export default function ExploreView() {
   const { articles, status, reload } = useArticles();
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [segment, setSegment] = useState<Segment>("all");
   const [tag, setTag] = useState("All Tags");
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setDebouncedQuery(query), 250);
+    return () => window.clearTimeout(timeout);
+  }, [query]);
 
   const filtered = articles.filter((a) => {
     if (segment === "public" && a.premium) return false;
@@ -25,9 +31,9 @@ export default function ExploreView() {
         return false;
       }
     }
-    if (query) {
+    if (debouncedQuery) {
       const hay = `${a.title} ${a.excerpt} ${a.creator} ${a.tags.join(" ")}`.toLowerCase();
-      if (!hay.includes(query.toLowerCase())) return false;
+      if (!hay.includes(debouncedQuery.toLowerCase())) return false;
     }
     return true;
   });
@@ -62,7 +68,6 @@ export default function ExploreView() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search creators, publications, essays, or Swarm topics..."
             />
-            <span className="inline-flex items-center gap-1.5 rounded-sm bg-paper-raised px-2.5 py-0.5 font-mono text-[13px] text-muted">⌘K</span>
           </div>
 
           {/* Segment + tags */}
@@ -116,7 +121,7 @@ export default function ExploreView() {
             {filtered.map((a) => (
               <motion.div
                 key={a.key}
-                className="h-[320px]"
+                className="h-[300px]"
                 layout
                 initial={{ opacity: 0, y: 16, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}

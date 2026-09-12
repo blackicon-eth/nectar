@@ -16,6 +16,7 @@ export interface ArticleSummary {
   swarmRef: string;
   historyRef?: string;
   publisherPublicKey?: string;
+  contentLength?: number;
 }
 
 export async function listPublishedArticles(): Promise<ArticleSummary[]> {
@@ -29,6 +30,12 @@ export async function listPublishedArticles(): Promise<ArticleSummary[]> {
     const strValue = (value: unknown): string =>
       typeof value === "string" ? value : "";
     const boolValue = (value: unknown): boolean => value === true;
+    const numberValue = (value: unknown): number | undefined => {
+      if (typeof value === "number") return value;
+      if (typeof value === "bigint") return Number(value);
+      if (typeof value === "string" && value) return Number(value);
+      return undefined;
+    };
     const strArray = (value: unknown): string[] =>
       typeof value === "string"
         ? value.split(",").map((t) => t.trim()).filter(Boolean)
@@ -53,6 +60,9 @@ export async function listPublishedArticles(): Promise<ArticleSummary[]> {
       swarmRef: strValue(payload.swarmRef ?? attr("swarm_ref")),
       historyRef: strValue(payload.historyRef) || undefined,
       publisherPublicKey: strValue(payload.publisherPublicKey) || undefined,
+      contentLength: numberValue(
+        payload.contentLength ?? attr("content_length"),
+      ),
     };
   });
 }

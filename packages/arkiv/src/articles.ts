@@ -15,6 +15,7 @@ export interface ArticleEntityFields {
   swarmRef: string;
   historyRef?: string;
   publisherPublicKey?: string;
+  contentLength: number;
   status: string;
   publishedAt: Date;
 }
@@ -50,6 +51,7 @@ export async function createArticleEntity(
       swarmRef: fields.swarmRef,
       historyRef: fields.historyRef,
       publisherPublicKey: fields.publisherPublicKey,
+      contentLength: fields.contentLength,
       status: fields.status,
       publishedAt: fields.publishedAt.toISOString(),
     }),
@@ -65,6 +67,7 @@ export async function createArticleEntity(
       swarm_ref: str(fields.swarmRef),
       history_ref: str(fields.historyRef ?? ""),
       publisher_public_key: str(fields.publisherPublicKey ?? ""),
+      content_length: u64(BigInt(fields.contentLength)),
       status: str(fields.status),
       published_at_ms: u64(BigInt(fields.publishedAt.getTime())),
     },

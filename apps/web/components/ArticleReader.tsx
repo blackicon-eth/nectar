@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import type { Article } from "@/lib/articles";
-import { fetchArticles, formatDate } from "@/lib/articles";
+import { fetchArticles, formatDate, readTime } from "@/lib/articles";
 import { coverFor } from "@/lib/covers";
 import Avatar from "./ui/Avatar";
 import Button from "./ui/Button";
@@ -74,8 +74,6 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
   }
 
   const paragraphs = content.split(/\n\s*\n/).filter(Boolean);
-  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
-  const readMinutes = Math.max(1, Math.ceil(wordCount / 200));
   const image = article.cover ?? coverFor(article.key);
 
   return (
@@ -94,7 +92,7 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
             </span>
             <span className="text-line-strong">•</span>
             <span>{formatDate(article.publishedAt)}</span>
-            <span>{readMinutes} min read</span>
+            <span>{readTime(article, content)}</span>
           </div>
           <h1 className="font-display text-[clamp(3.2rem,7vw,6.7rem)] font-semibold leading-[0.92] tracking-[-0.045em] text-ink">
             {article.title}
