@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -50,10 +51,23 @@ function AuthSessionProvider({ children }: { children: ReactNode }) {
   const { address: connectedAddress, isConnected } = useAccount();
   const connectedChainId = useChainId();
   const { data: walletClient } = useWalletClient();
-  const address = walletClient?.account.address ?? connectedAddress;
-  const chainId = walletClient?.chain.id ?? connectedChainId;
+  const address = connectedAddress;
+  const chainId = connectedChainId;
   const [status, setStatus] = useState<AuthStatus>("checking");
   const [signing, setSigning] = useState(false);
+  const previousIdentity = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    const identity = address ? `${address.toLowerCase()}:${chainId}` : undefined;
+    const changed = previousIdentity.current !== undefined && previousIdentity.current !== identity;
+
+    if (changed) {
+      setStatus("signed-out");
+      void fetch("/api/auth/session", { method: "DELETE" });
+    }
+
+    previousIdentity.current = identity;
+  }, [address, chainId]);
 
   useEffect(() => {
     let active = true;
@@ -104,7 +118,12 @@ function AuthSessionProvider({ children }: { children: ReactNode }) {
         throw new Error(nonceData.error ?? "Unable to start sign-in.");
       }
 
-      if (!walletClient) throw new Error("The connected wallet is not ready to sign.");
+       if (
+         !walletClient ||
+         walletClient.account.address.toLowerCase() !== address.toLowerCase()
+       ) {
+         throw new Error("The connected wallet is not ready to sign.");
+       }
       const signature = await walletClient.signMessage({
         account: address,
         message: nonceData.message,

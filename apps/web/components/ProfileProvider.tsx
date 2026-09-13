@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useAuth } from "./AuthProvider";
@@ -34,8 +35,10 @@ export default function ProfileProvider({ children }: { children: React.ReactNod
   const { status: authStatus } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [status, setStatus] = useState<"loading" | "error" | "idle">("idle");
+  const requestId = useRef(0);
 
   const reloadProfile = useCallback(async () => {
+    const currentRequest = ++requestId.current;
     if (authStatus !== "signed-in") {
       setProfile(null);
       setStatus("idle");
@@ -46,10 +49,11 @@ export default function ProfileProvider({ children }: { children: React.ReactNod
       const response = await fetch("/api/profile", { cache: "no-store" });
       if (!response.ok) throw new Error("Unable to load profile.");
       const data = (await response.json()) as { profile?: UserProfile | null };
+      if (requestId.current !== currentRequest) return;
       setProfile(data.profile ?? null);
       setStatus("idle");
     } catch {
-      setStatus("error");
+      if (requestId.current === currentRequest) setStatus("error");
     }
   }, [authStatus]);
 

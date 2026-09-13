@@ -24,7 +24,11 @@ export default function SubscriptionsView() {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
 
   useEffect(() => {
-    if (authStatus !== "signed-in") return;
+    if (authStatus !== "signed-in") {
+      setSubscriptions([]);
+      setStatus("idle");
+      return;
+    }
 
     let active = true;
     setStatus("loading");

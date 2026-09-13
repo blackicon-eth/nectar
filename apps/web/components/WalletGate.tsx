@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { AnimatePresence, motion } from "motion/react";
 import { useAccount, useChainId, useSwitchChain, useWalletClient } from "wagmi";
@@ -23,22 +23,37 @@ export default function WalletGate({
   description,
   autoSignIn = false,
 }: WalletGateProps) {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
   const { data: walletClient } = useWalletClient();
   const { openConnectModal } = useConnectModal();
   const { status, signing, signIn } = useAuth();
+  const autoSignInAttempt = useRef<string | undefined>(undefined);
   const checking = status === "checking";
   const authenticated = status === "signed-in";
   const onFuji = chainId === avalancheFuji.id;
-  const walletReady = isConnected && Boolean(walletClient) && !checking && onFuji;
+  const walletReady =
+    isConnected &&
+    Boolean(walletClient) &&
+    walletClient?.account.address.toLowerCase() === address?.toLowerCase() &&
+    !checking &&
+    onFuji;
 
   useEffect(() => {
-    if (autoSignIn && walletReady && status === "signed-out" && !signing) {
-      void signIn();
+    const identity = address ? `${address.toLowerCase()}:${chainId}` : undefined;
+    if (
+      autoSignIn &&
+      identity &&
+      walletReady &&
+      status === "signed-out" &&
+      !signing &&
+      autoSignInAttempt.current !== identity
+    ) {
+      autoSignInAttempt.current = identity;
+      void signIn().catch(() => undefined);
     }
-  }, [autoSignIn, signIn, signing, status, walletReady]);
+  }, [address, autoSignIn, chainId, signIn, signing, status, walletReady]);
 
   return (
     <AnimatePresence mode="wait" initial={false}>
@@ -117,7 +132,7 @@ export default function WalletGate({
                         ? "Connect Wallet"
                         : !onFuji
                           ? "Switch to Fuji"
-                          : "Sign in with Wallet"}
+                           : "Sign in"}
                </motion.span>
              </AnimatePresence>
            </Button>

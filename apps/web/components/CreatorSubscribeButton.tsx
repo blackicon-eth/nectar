@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useWalletClient } from "wagmi";
@@ -20,6 +20,7 @@ export default function CreatorSubscribeButton({
   const { status, signIn, signing } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [subscriptionState, setSubscriptionState] = useState<"unknown" | "active" | "inactive">("unknown");
+  const autoSignInAttempt = useRef<string | undefined>(undefined);
   const validCreator = /^0x[0-9a-fA-F]{40}$/.test(creatorAddress);
 
   useEffect(() => {
@@ -50,8 +51,16 @@ export default function CreatorSubscribeButton({
   }, [creatorAddress, status]);
 
   useEffect(() => {
-    if (address && walletClient && status === "signed-out" && !signing) {
-      void signIn();
+    const identity = address?.toLowerCase();
+    if (
+      identity &&
+      walletClient?.account.address.toLowerCase() === identity &&
+      status === "signed-out" &&
+      !signing &&
+      autoSignInAttempt.current !== identity
+    ) {
+      autoSignInAttempt.current = identity;
+      void signIn().catch(() => undefined);
     }
   }, [address, signIn, signing, status, walletClient]);
 
