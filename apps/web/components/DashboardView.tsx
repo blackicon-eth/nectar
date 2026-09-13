@@ -255,6 +255,7 @@ export default function DashboardView() {
 
 function ProfileEditor({ address }: { address?: string }) {
   const { profile, saveProfile, status } = useProfile();
+  const { status: authStatus, signIn, signing } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [avatarData, setAvatarData] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -324,9 +325,15 @@ function ProfileEditor({ address }: { address?: string }) {
             <input id="profile-avatar" className="sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" disabled={saving} onChange={(event) => void chooseAvatar(event.target.files?.[0])} />
           </div>
         </div>
-        <Button type="submit" icon="save" disabled={saving || status === "loading"} className="lg:col-span-2 justify-self-start">
-          {saving ? "Saving profile…" : "Save profile"}
-        </Button>
+        {authStatus === "signed-in" ? (
+          <Button type="submit" icon="save" disabled={saving || status === "loading"} className="lg:col-span-2 justify-self-start">
+            {saving ? "Saving profile…" : "Save profile"}
+          </Button>
+        ) : (
+          <Button type="button" icon="draw" disabled={signing} onClick={() => void signIn()} className="lg:col-span-2 justify-self-start">
+            {signing ? "Signing in…" : "Sign in with Wallet"}
+          </Button>
+        )}
       </form>
     </>
   );
