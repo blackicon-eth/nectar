@@ -26,6 +26,7 @@ next-env.d.ts
 
 # Local notes
 docs/
+nectar-technical-spec.md
 
 # Foundry
 packages/contracts/out/
