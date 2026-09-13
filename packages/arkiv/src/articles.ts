@@ -34,7 +34,6 @@ export interface CreatedArticleEntity {
 export interface CreateArticleOptions {
   privateKey: string;
   rpcUrl?: string;
-  ttlDays: number;
 }
 
 export interface PatchArticleFields {
@@ -106,7 +105,7 @@ export async function createArticleEntity(
       status: str(fields.status),
       published_at_ms: u64(BigInt(fields.publishedAt.getTime())),
     },
-    expires: ExpirationTime.fromDays(options.ttlDays),
+    expires: ExpirationTime.permanent(),
   });
 
   return {

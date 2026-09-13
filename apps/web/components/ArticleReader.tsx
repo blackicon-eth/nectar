@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { avalancheFuji } from "wagmi/chains";
 import type { Article } from "@/lib/articles";
 import { fetchArticles, formatDate, readTime } from "@/lib/articles";
 import { coverFor } from "@/lib/covers";
@@ -9,6 +12,8 @@ import Avatar from "./ui/Avatar";
 import Button from "./ui/Button";
 import Icon from "./ui/Icon";
 import Spinner from "./ui/Spinner";
+import { useAuth } from "./AuthProvider";
+import SubscriptionModal from "./SubscriptionModal";
 
 type ArticleReaderProps = { reference: string };
 
@@ -17,6 +22,13 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [premiumLocked, setPremiumLocked] = useState(false);
+  const [refreshToken, setRefreshToken] = useState(0);
+  const { address, signing, signIn, status } = useAuth();
+  const { isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+  const { openConnectModal } = useConnectModal();
 
   useEffect(() => {
     let cancelled = false;
@@ -26,15 +38,41 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
         const articles = await fetchArticles();
         const match = articles.find((item) => item.swarmRef === reference);
         if (!match) throw new Error("This article could not be found in the public registry.");
-        if (match.premium) throw new Error("This article is reserved for subscribers.");
+        const creatorCanRead =
+          match.premium &&
+          address &&
+          match.creatorAddress.toLowerCase() === address.toLowerCase();
 
-        const response = await fetch(`/api/articles/${reference}?premium=false`);
-        if (!response.ok) throw new Error("The article content could not be retrieved from Swarm.");
+        if (match.premium && !creatorCanRead && status !== "signed-in") {
+          if (!cancelled) {
+            setArticle(match);
+            setContent(match.excerpt);
+            setPremiumLocked(true);
+          }
+          return;
+        }
+
+        const query = match.premium
+          ? `?premium=true&historyRef=${encodeURIComponent(match.historyRef ?? "")}&publisherKey=${encodeURIComponent(match.publisherPublicKey ?? "")}`
+          : "?premium=false";
+        const response = await fetch(`/api/articles/${reference}${query}`);
+        if (!response.ok) {
+          if (match.premium) {
+            if (!cancelled) {
+              setArticle(match);
+              setContent(match.excerpt);
+              setPremiumLocked(true);
+            }
+            return;
+          }
+          throw new Error("The article content could not be retrieved from Swarm.");
+        }
 
         const text = await response.text();
         if (!cancelled) {
           setArticle(match);
           setContent(text);
+          setPremiumLocked(false);
         }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Unable to load this article.");
@@ -47,7 +85,7 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
     return () => {
       cancelled = true;
     };
-  }, [reference]);
+  }, [address, reference, refreshToken, status]);
 
   if (loading) {
     return (
@@ -134,13 +172,45 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
           <div className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted lg:mt-4">Open access</div>
         </aside>
 
-        <div className="font-body text-[19px] leading-[1.75] text-ink sm:text-[21px]">
-          {paragraphs.map((paragraph, index) => (
-            <p key={`${index}-${paragraph.slice(0, 16)}`} className={`mb-7 whitespace-pre-wrap last:mb-0 ${index === 0 ? "first-letter:float-left first-letter:mr-2 first-letter:font-display first-letter:text-[4.3em] first-letter:font-semibold first-letter:leading-[0.78] first-letter:text-honey" : ""}`}>
-              {paragraph}
-            </p>
-          ))}
-        </div>
+        <AnimatePresence mode="wait" initial={false}>
+          {premiumLocked ? (
+            <motion.div
+              key="premium-preview"
+              className="lg:col-span-1"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -14 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              <PremiumPreview
+                article={article}
+                isConnected={isConnected}
+                onFuji={chainId === avalancheFuji.id}
+                openConnectModal={openConnectModal}
+                signIn={signIn}
+                signing={signing}
+                status={status}
+                switchChain={() => switchChain({ chainId: avalancheFuji.id })}
+                onSubscribed={() => setRefreshToken((value) => value + 1)}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="full-article"
+              className="font-body text-[19px] leading-[1.75] text-ink sm:text-[21px]"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -14 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              {paragraphs.map((paragraph, index) => (
+                <p key={`${index}-${paragraph.slice(0, 16)}`} className={`mb-7 whitespace-pre-wrap last:mb-0 ${index === 0 ? "first-letter:float-left first-letter:mr-2 first-letter:font-display first-letter:text-[4.3em] first-letter:font-semibold first-letter:leading-[0.78] first-letter:text-honey" : ""}`}>
+                  {paragraph}
+                </p>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <aside className="mt-10 border-t border-line pt-5 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
           <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted">Archive reference</div>
@@ -149,5 +219,106 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
         </aside>
       </div>
     </motion.article>
+  );
+}
+
+function PremiumPreview({
+  article,
+  isConnected,
+  onFuji,
+  openConnectModal,
+  signIn,
+  signing,
+  status,
+  switchChain,
+  onSubscribed,
+}: {
+  article: Article;
+  isConnected: boolean;
+  onFuji: boolean;
+  openConnectModal?: () => void;
+  signIn: () => Promise<void>;
+  signing: boolean;
+  status: "checking" | "signed-out" | "signed-in";
+  switchChain: () => void;
+  onSubscribed: () => void;
+}) {
+  const checking = status === "checking";
+  const signedIn = status === "signed-in";
+  const needsWallet = !isConnected;
+  const needsNetwork = isConnected && !onFuji;
+  const needsSignature = isConnected && onFuji && !signedIn;
+
+  const label = checking
+    ? "Checking access"
+    : needsWallet
+      ? "Connect wallet to continue"
+      : needsNetwork
+        ? "Switch to Fuji"
+        : needsSignature
+          ? signing
+            ? "Signing in…"
+            : "Sign in to continue"
+          : "Subscribe to unlock";
+
+  const icon = needsWallet || needsNetwork ? "account_balance_wallet" : needsSignature ? "draw" : "lock_open";
+
+  function handleClick() {
+    if (needsWallet) {
+      openConnectModal?.();
+    } else if (needsNetwork) {
+      switchChain();
+    } else if (needsSignature) {
+      void signIn();
+    }
+  }
+
+  return (
+    <div className="relative">
+      <div className="relative max-h-[320px] overflow-hidden font-body text-[19px] leading-[1.75] text-ink sm:text-[21px]">
+        <p className="mb-7 whitespace-pre-wrap first-letter:float-left first-letter:mr-2 first-letter:font-display first-letter:text-[4.3em] first-letter:font-semibold first-letter:leading-[0.78] first-letter:text-honey">
+          {article.excerpt}
+        </p>
+        <div className="space-y-7 select-none blur-[2.5px] opacity-55" aria-hidden="true">
+          <p>{article.excerpt}</p>
+          <p>{article.excerpt}</p>
+        </div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent via-paper/75 to-paper" />
+      </div>
+
+      <div className="relative mt-4 overflow-hidden border border-line-strong bg-paper-card px-6 py-7 shadow-card sm:px-8">
+        <div className="absolute right-0 top-0 h-20 w-20 translate-x-8 -translate-y-8 rounded-full bg-honey/20 blur-2xl" />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+          <div>
+            <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-amber">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber" />
+              Subscriber archive
+            </div>
+            <h2 className="font-display mt-2 text-[28px] leading-tight text-ink">Keep reading this story.</h2>
+            <p className="mt-2 max-w-md text-[15px] leading-relaxed text-muted">
+              {needsWallet || needsNetwork || needsSignature
+                ? "Connect and verify your Fuji wallet to check your subscription."
+                : "Your subscription record is not active for this creator yet."}
+            </p>
+          </div>
+          {signedIn ? (
+            <SubscriptionModal
+              creatorAddress={article.creatorAddress}
+              creatorName={article.creatorEnsName || article.creator}
+              onSuccess={onSubscribed}
+            />
+          ) : (
+            <Button
+              className="shrink-0"
+              icon={icon}
+              disabled={checking || signing}
+              onClick={handleClick}
+            >
+              {label}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

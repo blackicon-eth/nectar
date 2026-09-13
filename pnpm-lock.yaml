@@ -20,6 +20,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@nectar/arkiv':
+        specifier: workspace:*
+        version: link:../../packages/arkiv
       '@nectar/config':
         specifier: workspace:*
         version: link:../../packages/config

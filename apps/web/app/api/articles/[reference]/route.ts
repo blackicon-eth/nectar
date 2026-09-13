@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import {
   getArticleContent,
   ContentUnavailableError,
+  listPublishedArticles,
 } from "@nectar/domain";
+import { hasActiveSubscription } from "@nectar/arkiv";
+import { getConfig } from "@nectar/config";
+import { cookies } from "next/headers";
+import { getSession, sessionCookieName } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -19,6 +24,37 @@ export async function GET(request: Request, context: RouteContext) {
     url.searchParams.get("publisherKey") ?? undefined;
 
   try {
+    if (premium) {
+      const article = (await listPublishedArticles()).find(
+        (item) => item.swarmRef === reference,
+      );
+      const session = await getSession(
+        (await cookies()).get(sessionCookieName())?.value,
+      );
+
+      const isCreator = Boolean(
+        article &&
+          session &&
+          session.walletAddress.toLowerCase() ===
+            article.creatorAddress.toLowerCase(),
+      );
+      const hasSubscription =
+        article && session && !isCreator
+          ? await hasActiveSubscription(
+              session.walletAddress,
+              article.creatorAddress,
+              { rpcUrl: getConfig().arkiv.rpcUrl },
+            )
+          : false;
+
+      if (!article || !session || (!isCreator && !hasSubscription)) {
+        return NextResponse.json(
+          { error: "Premium access is not active for this wallet." },
+          { status: 403 },
+        );
+      }
+    }
+
     const content = await getArticleContent({
       reference,
       premium,

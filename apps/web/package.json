@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@nectar/domain": "workspace:*",
+    "@nectar/arkiv": "workspace:*",
     "@nectar/db": "workspace:*",
     "@nectar/config": "workspace:*",
     "@nectar/swarm": "workspace:*",

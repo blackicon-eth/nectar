@@ -34,8 +34,12 @@ export interface PublishActContentOptions {
 export async function publishActContent(
   options: PublishActContentOptions,
 ): Promise<ActPublishResult> {
-  const { createActForContent, hexToUint8Array, parseCompressedPublicKey } =
-    await import("@snaha/swarm-id");
+  const {
+    createActForContent,
+    hexToUint8Array,
+    parseCompressedPublicKey,
+    publicKeyFromPrivate,
+  } = await import("@snaha/swarm-id");
 
   const upload = await uploadContent({
     beeUrl: options.beeUrl,
@@ -46,9 +50,13 @@ export async function publishActContent(
   const target = { mode: "subsidised" as const, gatewayUrl: options.beeUrl };
   const publisherPrivateKey = hexToUint8Array(options.publisherPrivateKey);
   const contentReference = hexToUint8Array(upload.reference);
-  const granteePublicKeys = (options.granteePublicKeys ?? []).map((key) =>
-    parseCompressedPublicKey(key),
-  );
+  const publisherPublicKey = publicKeyFromPrivate(publisherPrivateKey);
+  const granteePublicKeys = [
+    publisherPublicKey,
+    ...(options.granteePublicKeys ?? []).map((key) =>
+      parseCompressedPublicKey(key),
+    ),
+  ];
 
   return createActForContent(
     target,

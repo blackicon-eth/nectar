@@ -107,7 +107,6 @@ export async function publishArticle(
   const entity = await createArticleEntity(fields, {
     privateKey: config.arkiv.privateKey,
     rpcUrl: config.arkiv.rpcUrl,
-    ttlDays: config.arkiv.articleTtlDays,
   });
 
   return {

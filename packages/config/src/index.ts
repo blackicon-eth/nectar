@@ -8,7 +8,6 @@ const EnvSchema = z.object({
   TURSO_AUTH_TOKEN: z.string().optional(),
   ARKIV_PRIVATE_KEY: z.string().optional(),
   ARKIV_RPC_URL: z.string().optional(),
-  ARKIV_ARTICLE_TTL_DAYS: z.coerce.number().int().positive().default(90),
   SWARM_BEE_URL: z.string().url().default("https://api.gateway.ethswarm.org"),
   SWARM_POSTAGE_BATCH_ID: z.string().optional(),
   SWARM_ACT_PUBLISHER_KEY: z.string().optional(),
@@ -24,7 +23,6 @@ export interface AppConfig {
   arkiv: {
     privateKey: string | undefined;
     rpcUrl: string | undefined;
-    articleTtlDays: number;
   };
   swarm: {
     beeUrl: string;
@@ -72,7 +70,6 @@ export function getConfig(): AppConfig {
       arkiv: {
         privateKey: parsed.ARKIV_PRIVATE_KEY,
         rpcUrl: parsed.ARKIV_RPC_URL,
-        articleTtlDays: parsed.ARKIV_ARTICLE_TTL_DAYS,
       },
       swarm: {
         beeUrl: parsed.SWARM_BEE_URL,
