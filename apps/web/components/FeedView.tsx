@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useArticles } from "@/components/ArticlesProvider";
 import { short } from "@/lib/articles";
 import ArticleCard from "./ArticleCard";
@@ -98,7 +99,7 @@ export default function FeedView() {
                   <a
                     key={a.key}
                     href={`/api/articles/${a.swarmRef}`}
-                    className="py-3 no-underline"
+                    className="group py-3 no-underline"
                     style={{ borderTop: i === 0 ? "none" : "1px solid var(--color-line)" }}
                   >
                     <div className="flex items-center gap-2 font-mono text-[12px] text-muted">
@@ -106,7 +107,7 @@ export default function FeedView() {
                       <Avatar size={18} name={a.profileName || a.creatorEnsName || a.creator} src={a.profileAvatar} />
                       <span className="truncate">{a.profileName || a.creatorEnsName || `${a.creator.slice(0, 10)}...${a.creator.slice(30)}`}</span>
                     </div>
-                    <div className="font-display mt-1 text-[18px] font-semibold">{a.title}</div>
+                    <div className="font-display mt-1 text-[18px] font-semibold transition-colors group-hover:text-honey">{a.title}</div>
                   </a>
                 ))}
               </div>
@@ -120,15 +121,19 @@ export default function FeedView() {
               </div>
               <div className="flex flex-col gap-4">
                 {hives.map(([key, hive]) => (
-                  <div key={key} className="flex items-center gap-2.5">
+                  <Link
+                    key={key}
+                    href={`/creator/${key}`}
+                    className="group flex items-center gap-2.5 rounded-md py-1 no-underline transition-colors hover:bg-paper-raised"
+                  >
                     <div className="flex items-center gap-2.5">
                       <Avatar size={38} name={hive.name} src={hive.avatar} />
                       <div>
-                        <div className="font-mono text-[13px] font-semibold">{hive.name}</div>
+                        <div className="font-mono text-[13px] font-semibold transition-colors group-hover:text-honey">{hive.name}</div>
                         <div className="text-body-sm text-muted">{hive.count} {hive.count === 1 ? "article" : "articles"}</div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
                 {hives.length === 0 && <div className="text-body-sm text-muted">Creator activity will appear here.</div>}
               </div>
