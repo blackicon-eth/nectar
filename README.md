@@ -31,7 +31,7 @@ Nectar uses three sponsor technologies as core parts of the product:
 
 Arkiv stores the metadata Nectar needs to discover articles and verify subscription access. Articles use typed attributes for creator, publication, premium status, and tags. Subscription entities include expiration timestamps, allowing access to expire naturally through Arkiv queries.
 
-Implementation:
+Implementation examples:
 
 - [`packages/arkiv/src/articles.ts`](packages/arkiv/src/articles.ts)
 - [`packages/arkiv/src/subscriptions.ts`](packages/arkiv/src/subscriptions.ts)
@@ -42,7 +42,7 @@ Implementation:
 
 Swarm is Nectar's canonical content layer. Public articles are uploaded to Swarm and retrieved by content reference. Premium articles use encrypted Swarm content, while Arkiv stores the metadata needed to discover and gate them.
 
-Implementation:
+Implementation examples:
 
 - [`packages/swarm`](packages/swarm)
 - [`packages/domain/src/publishArticle.ts`](packages/domain/src/publishArticle.ts)
@@ -55,7 +55,7 @@ Nectar uses Avalanche Fuji to process creator subscriptions with USDC. The smart
 
 Deployed Fuji contract: [`0x57d208210336D6b372A521c3662fe2ca49B7F25c`](https://testnet.snowtrace.io/address/0x57d208210336D6b372A521c3662fe2ca49B7F25c)
 
-Implementation:
+Implementation examples:
 
 - [`packages/contracts/src/NectarSubscriptions.sol`](packages/contracts/src/NectarSubscriptions.sol)
 - [`packages/contracts/test/NectarSubscriptions.t.sol`](packages/contracts/test/NectarSubscriptions.t.sol)
@@ -79,13 +79,6 @@ packages/swarm/       Swarm upload and retrieval helpers
 pnpm install
 cp .env.example .env.local
 pnpm dev
-```
-
-Run checks with:
-
-```bash
-pnpm typecheck
-pnpm build
 ```
 
 ## License
