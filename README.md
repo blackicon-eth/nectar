@@ -3,9 +3,9 @@
   <p align="center">A creator-first publishing platform for public and premium writing.</p>
 </p>
 
-Nectar lets creators publish articles, store canonical content on decentralized storage, index publication metadata, and monetize premium work through stablecoin subscriptions.
+---
 
-This project was built at **ETHRome 2026**.
+Nectar lets creators publish articles, store canonical content on decentralized storage, index publication metadata, and monetize premium work through stablecoin subscriptions.
 
 ## Tech Stack
 
