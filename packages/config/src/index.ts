@@ -9,7 +9,6 @@ const EnvSchema = z.object({
   ARKIV_PRIVATE_KEY: z.string().optional(),
   ARKIV_RPC_URL: z.string().optional(),
   SWARM_BEE_URL: z.string().url().default("https://api.gateway.ethswarm.org"),
-  SWARM_POSTAGE_BATCH_ID: z.string().optional(),
   SWARM_ACT_PUBLISHER_KEY: z.string().optional(),
 });
 
@@ -26,7 +25,6 @@ export interface AppConfig {
   };
   swarm: {
     beeUrl: string;
-    postageBatchId: string | undefined;
     actPublisherKey: string | undefined;
   };
 }
@@ -73,7 +71,6 @@ export function getConfig(): AppConfig {
       },
       swarm: {
         beeUrl: parsed.SWARM_BEE_URL,
-        postageBatchId: parsed.SWARM_POSTAGE_BATCH_ID,
         actPublisherKey: parsed.SWARM_ACT_PUBLISHER_KEY,
       },
     };
