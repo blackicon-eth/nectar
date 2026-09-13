@@ -3,6 +3,7 @@ import { SiweMessage } from "siwe";
 import { consumeAuthNonce, createSession, sessionCookieName } from "@/lib/auth";
 
 export const runtime = "nodejs";
+const FUJI_CHAIN_ID = 43113;
 
 export async function POST(request: Request) {
   try {
@@ -15,6 +16,9 @@ export async function POST(request: Request) {
     }
 
     const message = new SiweMessage(body.message);
+    if (message.chainId !== FUJI_CHAIN_ID) {
+      return NextResponse.json({ error: "Sign in on Avalanche Fuji." }, { status: 401 });
+    }
     const domain =
       request.headers.get("x-forwarded-host") ?? request.headers.get("host");
     const protocol = request.headers.get("x-forwarded-proto") ?? "https";

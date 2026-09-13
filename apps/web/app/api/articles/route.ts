@@ -84,6 +84,8 @@ type SignedFields = {
   premium: boolean;
 };
 
+const FUJI_CHAIN_ID = 43113;
+
 export async function POST(request: Request) {
   try {
     const isMultipart = request.headers
@@ -147,7 +149,8 @@ export async function POST(request: Request) {
     if (
       !session ||
       session.walletAddress !== parsed.data.creatorAddress.toLowerCase() ||
-      session.chainId !== parsed.data.chainId
+      session.chainId !== FUJI_CHAIN_ID ||
+      parsed.data.chainId !== FUJI_CHAIN_ID
     ) {
       return NextResponse.json({ error: "Sign in with this wallet before publishing." }, { status: 401 });
     }

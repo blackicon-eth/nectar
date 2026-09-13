@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { useAccount, useChainId, useWalletClient } from "wagmi";
+import { avalancheFuji } from "wagmi/chains";
 
 type AuthStatus = "checking" | "signed-out" | "signed-in";
 
@@ -21,7 +22,31 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+const preHydrationValue: AuthContextValue = {
+  status: "checking",
+  signing: false,
+  signIn: async () => undefined,
+};
+
 export default function AuthProvider({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <AuthContext.Provider value={preHydrationValue}>
+        {children}
+      </AuthContext.Provider>
+    );
+  }
+
+  return <AuthSessionProvider>{children}</AuthSessionProvider>;
+}
+
+function AuthSessionProvider({ children }: { children: ReactNode }) {
   const { address: connectedAddress, isConnected } = useAccount();
   const connectedChainId = useChainId();
   const { data: walletClient } = useWalletClient();
@@ -47,7 +72,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
           setStatus(
             session.authenticated &&
               session.address?.toLowerCase() === address.toLowerCase() &&
-              session.chainId === chainId
+              chainId === avalancheFuji.id &&
+              session.chainId === avalancheFuji.id
               ? "signed-in"
               : "signed-out",
           );
@@ -68,7 +94,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       const nonceResponse = await fetch("/api/auth/nonce", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ address, chainId }),
+        body: JSON.stringify({ address, chainId: avalancheFuji.id }),
       });
       const nonceData = (await nonceResponse.json()) as {
         message?: string;

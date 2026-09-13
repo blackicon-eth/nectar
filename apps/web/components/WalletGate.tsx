@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { AnimatePresence, motion } from "motion/react";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { avalancheFuji } from "wagmi/chains";
 import Button from "./ui/Button";
 import Icon from "./ui/Icon";
 import { useAuth } from "./AuthProvider";
@@ -20,11 +21,14 @@ export default function WalletGate({
   description,
 }: WalletGateProps) {
   const { isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
   const { openConnectModal } = useConnectModal();
   const { status, signing, signIn } = useAuth();
   const checking = status === "checking";
   const authenticated = status === "signed-in";
-  const walletReady = isConnected && !checking;
+  const onFuji = chainId === avalancheFuji.id;
+  const walletReady = isConnected && !checking && onFuji;
 
   return (
     <AnimatePresence mode="wait" initial={false}>
@@ -60,7 +64,13 @@ export default function WalletGate({
                exit={{ opacity: 0 }}
                transition={{ duration: 0.18 }}
              >
-               {checking ? "Checking access" : walletReady ? "Signature required" : "Wallet required"}
+                {checking
+                  ? "Checking access"
+                  : !isConnected
+                    ? "Wallet required"
+                    : !onFuji
+                      ? "Fuji network required"
+                      : "Signature required"}
              </motion.span>
            </AnimatePresence>
           <h1 className="font-display text-headline-lg mt-2 max-md:text-[32px] max-md:leading-[1.2]">
@@ -71,7 +81,15 @@ export default function WalletGate({
              className="mt-7"
              icon={walletReady ? "draw" : "account_balance_wallet"}
              disabled={checking || signing}
-             onClick={() => (walletReady ? signIn() : openConnectModal?.())}
+              onClick={() => {
+                if (!isConnected) {
+                  openConnectModal?.();
+                } else if (!onFuji) {
+                  switchChain({ chainId: avalancheFuji.id });
+                } else {
+                  signIn();
+                }
+              }}
            >
              <AnimatePresence mode="wait" initial={false}>
                <motion.span
@@ -81,7 +99,15 @@ export default function WalletGate({
                  exit={{ opacity: 0 }}
                  transition={{ duration: 0.18 }}
                >
-                 {checking ? "Checking…" : signing ? "Signing…" : walletReady ? "Sign in with Wallet" : "Connect Wallet"}
+                  {checking
+                    ? "Checking…"
+                    : signing
+                      ? "Signing…"
+                      : !isConnected
+                        ? "Connect Wallet"
+                        : !onFuji
+                          ? "Switch to Fuji"
+                          : "Sign in with Wallet"}
                </motion.span>
              </AnimatePresence>
            </Button>

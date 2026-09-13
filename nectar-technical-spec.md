@@ -27,7 +27,7 @@ Nectar is a network of creator publications.
 
 A creator:
 
-1. signs in with Privy;
+1. connects a wallet and signs in with SIWE;
 2. pays a creation fee;
 3. Nectar creates an ENSv2 subdomain under `nectar.eth`;
 4. can manage contributors;
@@ -210,9 +210,13 @@ Use **Next.js**.
 
 ### Authentication
 
-Use **Privy** for fast wallet/account onboarding.
+Use wallet-based **Sign-In with Ethereum (SIWE)** for authentication. The server
+must issue a nonce, verify the signed message, bind the session to the wallet
+address and chain ID, and use an HTTP-only session cookie for subsequent API
+requests.
 
-Users should not need to manually understand blockchain wallet management for normal UX.
+Users should be guided through wallet connection and signing without exposing
+authentication implementation details in normal UX.
 
 ### Discovery
 
@@ -690,7 +694,6 @@ packages/db/
 
 **creators**
 - `id`
-- `privyUserId`
 - `walletAddress`
 - `ensName`
 - `ensNode` / relevant ENS identifier
@@ -699,7 +702,6 @@ packages/db/
 **contributors**
 - `id`
 - `creatorId`
-- `privyUserId`
 - `walletAddress`
 - `displayName`
 - `status`
@@ -928,9 +930,12 @@ Do not expose:
 - Swarm credentials;
 - Arkiv signing credentials.
 
-All signing must occur server-side in the worker/backend.
+User authentication and article provenance messages are signed by the user's
+wallet and verified server-side. Relayer, Arkiv, Swarm, and contract
+transactions must be signed server-side in the worker/backend.
 
-Privy identity must be mapped to a stable application creator/contributor identity.
+The verified SIWE wallet address and server-side session must be mapped to a
+stable application creator/contributor identity.
 
 **Validate ownership before:**
 
@@ -1032,7 +1037,7 @@ Do not create duplicate Arkiv entities when retrying the same publication event.
 - environment/config handling.
 
 **Phase 2 — Authentication and creators**
-- Privy;
+- SIWE nonce/session authentication;
 - creator creation flow;
 - Avalanche creation payment;
 - ENSv2 subdomain creation;
@@ -1147,7 +1152,7 @@ Canonical content storage.
 
 The final demo should be able to show:
 
-1. Alice logs in with Privy.
+1. Alice connects her wallet and signs in with SIWE.
 2. Alice pays the Nectar creation fee.
 3. Nectar creates: `alice.nectar.eth`
 4. Alice creates contributor Bob.

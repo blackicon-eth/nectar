@@ -107,7 +107,7 @@ export default function FeedView() {
                     style={{ borderTop: i === 0 ? "none" : "1px solid var(--color-line)" }}
                   >
                     <div className="font-mono text-[12px] text-muted">
-                      <span className="font-semibold text-amber">0{i + 1}</span> by @{a.creator}
+                      <span className="font-semibold text-amber">0{i + 1}</span> by {a.creator.slice(0, 10)}...{a.creator.slice(30)}
                     </div>
                     <div className="font-display mt-1 text-[18px] font-semibold">{a.title}</div>
                   </a>

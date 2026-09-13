@@ -4,6 +4,7 @@ import { SiweMessage, generateNonce } from "siwe";
 import { createAuthNonce } from "@/lib/auth";
 
 export const runtime = "nodejs";
+const FUJI_CHAIN_ID = 43113;
 
 function requestOrigin(request: Request): { domain: string; uri: string } {
   const domain =
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
     if (!body.address || !/^0x[0-9a-fA-F]{40}$/.test(body.address)) {
       return NextResponse.json({ error: "Invalid wallet address." }, { status: 400 });
     }
-    if (!Number.isInteger(body.chainId)) {
+    if (body.chainId !== FUJI_CHAIN_ID) {
       return NextResponse.json({ error: "Invalid chain ID." }, { status: 400 });
     }
 

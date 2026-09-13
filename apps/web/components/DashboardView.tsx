@@ -8,12 +8,14 @@ import Avatar from "./ui/Avatar";
 import Badge from "./ui/Badge";
 import Button from "./ui/Button";
 import Icon from "./ui/Icon";
+import SubscriptionPriceCard from "./SubscriptionPriceCard";
 
-type Tab = "overview" | "articles" | "settings";
+type Tab = "overview" | "articles" | "subscriptions" | "settings";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "dashboard" },
   { id: "articles", label: "My articles", icon: "auto_stories" },
+  { id: "subscriptions", label: "Subscriptions", icon: "sell" },
   { id: "settings", label: "Identity", icon: "fingerprint" },
 ];
 
@@ -172,13 +174,6 @@ export default function DashboardView() {
 
       {tab === "articles" && (
         <section className="mt-5 overflow-hidden rounded-lg border border-line bg-paper-card shadow-card">
-          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line p-6">
-            <div>
-              <SectionHeading title="Your articles" />
-              <p className="mt-2 text-body-sm text-muted">Only publications signed by this wallet are shown.</p>
-            </div>
-            {status === "loading" && <span className="font-mono text-[12px] text-muted">Refreshing…</span>}
-          </div>
           {ownedArticles.length === 0 ? (
             <div className="p-8">
               <EmptyState title="Nothing published from this wallet" body="Write and sign your first article to populate the ledger." href="/write" />
@@ -215,10 +210,16 @@ export default function DashboardView() {
         </section>
       )}
 
+      {tab === "subscriptions" && (
+        <section className="mt-5 w-full">
+          <SubscriptionPriceCard />
+        </section>
+      )}
+
       {tab === "settings" && (
-        <section className="mt-5 max-w-3xl rounded-lg border border-line bg-paper-card p-6 shadow-card sm:p-7">
+        <section className="mt-5 w-full rounded-lg border border-line bg-paper-card p-6 shadow-card sm:p-7">
           <SectionHeading title="Identity and provenance" />
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <div className="rounded-md border border-line bg-paper-raised p-4">
               <div className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted">Connected wallet</div>
               <div className="mt-2 break-all font-mono text-[13px] text-ink">{address}</div>

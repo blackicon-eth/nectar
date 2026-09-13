@@ -10,6 +10,8 @@ import { useChainId } from "wagmi";
 import { articleSigningMessage } from "@/lib/articleSigning";
 import { MIN_ARTICLE_CHARS } from "@/lib/articles";
 import { FIXED_TAGS } from "@/lib/tags";
+import { avalancheFuji } from "wagmi/chains";
+import { useSubscriptionPrice } from "@/hooks/useSubscriptionPrice";
 import { useArticles } from "./ArticlesProvider";
 import Avatar from "./ui/Avatar";
 import Button from "./ui/Button";
@@ -24,7 +26,9 @@ export default function ArticleForm() {
   const connectedChainId = useChainId();
   const { data: walletClient } = useWalletClient();
   const creator = walletClient?.account.address ?? address ?? "";
-  const chainId = walletClient?.chain.id ?? connectedChainId;
+  const chainId = avalancheFuji.id;
+  const { hasPrice: hasSubscriptionPrice, isLoading: subscriptionPriceLoading, price: subscriptionPrice } =
+    useSubscriptionPrice(creator as `0x${string}` | undefined);
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [content, setContent] = useState("");
@@ -47,8 +51,20 @@ export default function ArticleForm() {
     return () => URL.revokeObjectURL(previewUrl);
   }, [image]);
 
+  useEffect(() => {
+    if (subscriptionPrice !== undefined && !hasSubscriptionPrice) {
+      setPremium(false);
+    }
+  }, [hasSubscriptionPrice, subscriptionPrice]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (connectedChainId !== avalancheFuji.id) {
+      const message = "Switch to Avalanche Fuji before publishing.";
+      setError(message);
+      toast.error("Wrong network", { description: message });
+      return;
+    }
     if (content.length < MIN_ARTICLE_CHARS) {
       const message = `Your article needs at least ${MIN_ARTICLE_CHARS.toLocaleString()} characters.`;
       setError(message);
@@ -278,17 +294,22 @@ export default function ArticleForm() {
                   </span>
                   <span className="font-display text-title-lg">Premium content</span>
                 </div>
-                <label className={`relative inline-flex items-center ${loading ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
+                <label className={`relative inline-flex items-center ${loading || subscriptionPriceLoading || !hasSubscriptionPrice ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}>
                   <input
                     className="peer sr-only"
                     type="checkbox"
                     checked={premium}
                     onChange={(e) => setPremium(e.target.checked)}
-                    disabled={loading}
+                    disabled={loading || subscriptionPriceLoading || !hasSubscriptionPrice}
                   />
                   <span className="relative h-8 w-14 rounded-full bg-line-strong transition-colors after:absolute after:left-1 after:top-1 after:h-6 after:w-6 after:rounded-full after:bg-paper-card after:transition-transform peer-checked:bg-honey peer-checked:after:translate-x-6" />
                 </label>
               </div>
+              {!subscriptionPriceLoading && !hasSubscriptionPrice && (
+                <p className="mt-3 pl-12 text-body-sm text-muted">
+                  Set a subscription price in your dashboard before publishing premium content.
+                </p>
+              )}
             </section>
           </aside>
         </div>
