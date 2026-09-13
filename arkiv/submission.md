@@ -44,41 +44,6 @@ Exact read-path files:
 The query is scoped by `project = "nectar"` and `type = "article"`. The response
 contains Arkiv entity keys, typed attributes, and decoded payload metadata.
 
-## Mission: Decommission
-
-**Status: partial evidence only.** The current article discovery/read path is Arkiv-backed,
-but the repository does not contain a separate pre-migration implementation. The initial
-commit `5a3e38f` already used `@nectar/arkiv` from `packages/domain/src/listArticles.ts`,
-so it cannot honestly be presented as a before-Arkiv migration snapshot.
-
-Current implementation:
-
-- Current read path: [`apps/web/app/api/articles/route.ts`](../apps/web/app/api/articles/route.ts)
-- Arkiv query adapter: [`packages/domain/src/listArticles.ts`](../packages/domain/src/listArticles.ts)
-- Entity query: [`packages/arkiv/src/articles.ts`](../packages/arkiv/src/articles.ts)
-- Initial repository reference: [`5a3e38f`](https://github.com/blackicon-eth/nectar/tree/5a3e38f)
-
-To inspect the historical/current difference:
-
-```sh
-git show 5a3e38f:packages/domain/src/listArticles.ts
-git show 29ae17c:packages/domain/src/listArticles.ts
-git diff 5a3e38f..29ae17c -- packages/domain/src/listArticles.ts apps/web/app/api/articles/route.ts packages/arkiv
-```
-
-Live Tiramisu article evidence was recorded separately with entity keys and creation
-transactions. Representative records:
-
-```text
-0xe2ea6171ad190339936e78d8bb47bf2c39d1b07a1c7589555222ff7a6d0fe042
-creation tx 0x0d5b716b8cc89d0f826b9cc4ff8cd989d186886ebd5fd0540aa97caf2626aca3
-creator 0x55a458f46e319F99e4983c70B179b316507F0d86
-
-0xad6c190fa1648cf29ae5c1848f2a1b14f64b0a9ce81c4d70e53421234340d588
-creation tx 0x6cb873a2f2274294191dd96970f8043ff0f5300854466f9f8a5b649f1d9ac69f
-creator 0xf2E19F606a775c02D785d4c2f4b7BCbb2Dfc21F2
-```
-
 ## Mission: Built to expire
 
 **Status: implemented in the production path; natural-expiration replay is not currently
@@ -95,13 +60,13 @@ Subscription entities are created with a real expiration date and no delete call
 The important lines are:
 
 ```ts
-expires: ExpirationTime.atDate(fields.expiresAt)
+expires: ExpirationTime.atDate(fields.expiresAt);
 ```
 
 and:
 
 ```ts
-if (expiresAt.getTime() <= now) return []
+if (expiresAt.getTime() <= now) return [];
 ```
 
 The read path therefore changes from accessible to inaccessible when Arkiv stops returning
@@ -121,7 +86,7 @@ The UI flow that produces the verified payment is in
 The deployed Fuji registry is documented in the root
 [`README.md`](../README.md).
 
-Current live subscription evidence is not expired yet:
+Current live subscription evidence is not expired yet because it has a 30-days life cycle:
 
 ```text
 Arkiv entity 0x154ded3273f41c5543f8d38e3aef8b9979636ab932a6349c436e1ebfb81db782
@@ -140,31 +105,10 @@ The corresponding saved Fuji payment receipts are recorded in the entities as
 is checked into this repository, so judges should treat the live records as active-state
 evidence, not as an already-completed expiry replay.
 
-## Mission: Live wire
-
-**Status: not implemented.** Nectar's current Arkiv client uses HTTP transport through
-Viem's `http()` transport:
-
-- [`packages/arkiv/src/client.ts`](../packages/arkiv/src/client.ts)
-- [`packages/arkiv/src/articles.ts`](../packages/arkiv/src/articles.ts)
-- [`packages/arkiv/src/subscriptions.ts`](../packages/arkiv/src/subscriptions.ts)
-
-There is no application WebSocket client, subscription listener, two-client update demo,
-or reconnection implementation in the repository. The `watchEntityEvents` API from the
-SDK is not used by Nectar. This mission should not be claimed from the current codebase.
-
-## Video timestamps
-
-No video file or timestamp manifest is committed in this repository. Video timestamps are
-therefore intentionally not fabricated here. Before submission, add exact `MM:SS` links for
-any recorded demo, or state that no video was provided.
-
 ## Known limitations
 
 - The Arkiv endpoint requires an API key and may be rate-limited.
 - Article creation also depends on Swarm availability; premium creation additionally
   depends on the ACT publisher key.
 - Subscription indexing requires a successful Avalanche Fuji receipt before Arkiv creation.
-- No pre-Arkiv migration commit is available in git history.
 - No saved natural-expiration before/after recording is available.
-- No WebSocket/live-update implementation is available.
