@@ -1,10 +1,7 @@
 <p align="center">
   <img src="apps/web/public/logo.png" alt="Nectar" width="180">
+  <p align="center">A creator-first publishing platform for public and premium writing.</p>
 </p>
-
-<h1 align="center">Nectar</h1>
-
-<p align="center">A creator-first publishing platform for public and premium writing.</p>
 
 Nectar lets creators publish articles, store canonical content on decentralized storage, index publication metadata, and monetize premium work through stablecoin subscriptions.
 
