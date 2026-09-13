@@ -25,12 +25,18 @@ export default function SubscriptionModal({
   creatorAddress,
   creatorName,
   onSuccess,
+  open: controlledOpen,
+  onOpenChange,
+  showTrigger = true,
 }: {
   creatorAddress: string;
   creatorName: string;
   onSuccess: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [phase, setPhase] = useState<"idle" | "approving" | "paying" | "indexing">("idle");
   const { address } = useAccount();
   const chainId = useChainId();
@@ -120,16 +126,23 @@ export default function SubscriptionModal({
   }
 
   const busy = isPending || phase !== "idle";
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = (next: boolean) => {
+    if (controlledOpen === undefined) setInternalOpen(next);
+    onOpenChange?.(next);
+  };
 
   return (
     <>
-      <Button
-        icon="lock_open"
-        disabled={priceLoading || !price || chainId !== avalancheFuji.id}
-        onClick={() => setOpen(true)}
-      >
-        Subscribe to unlock
-      </Button>
+      {showTrigger && (
+        <Button
+          icon="lock_open"
+          disabled={priceLoading || !price || chainId !== avalancheFuji.id}
+          onClick={() => setOpen(true)}
+        >
+          Subscribe to unlock
+        </Button>
+      )}
 
       <AnimatePresence>
         {open && (

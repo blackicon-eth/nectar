@@ -12,6 +12,8 @@ export interface ArticleSummary {
   chainId?: number;
   signature: string;
   creatorEnsName?: string;
+  profileName?: string;
+  profileAvatar?: string;
   contributor?: string;
   premium: boolean;
   status: string;

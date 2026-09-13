@@ -13,6 +13,7 @@ import { FIXED_TAGS } from "@/lib/tags";
 import { avalancheFuji } from "wagmi/chains";
 import { useSubscriptionPrice } from "@/hooks/useSubscriptionPrice";
 import { useArticles } from "./ArticlesProvider";
+import { useProfile } from "./ProfileProvider";
 import Avatar from "./ui/Avatar";
 import Button from "./ui/Button";
 import Icon from "./ui/Icon";
@@ -22,6 +23,7 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export default function ArticleForm() {
   const router = useRouter();
   const { reload } = useArticles();
+  const { profile } = useProfile();
   const { address } = useAccount();
   const connectedChainId = useChainId();
   const { data: walletClient } = useWalletClient();
@@ -39,6 +41,7 @@ export default function ArticleForm() {
   const [premium, setPremium] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formDisabled = loading && !error;
 
   useEffect(() => {
     if (!image) {
@@ -75,31 +78,31 @@ export default function ArticleForm() {
     setError(null);
     try {
       const formData = new FormData();
-       formData.append("creator", "");
-       formData.append("creatorAddress", creator);
-       formData.append("chainId", String(chainId));
+      formData.append("creator", "");
+      formData.append("creatorAddress", creator);
+      formData.append("chainId", String(chainId));
       formData.append("title", title);
       formData.append("subtitle", subtitle);
       formData.append("content", content);
       formData.append("tags", JSON.stringify(tags));
-       formData.append("premium", String(premium));
-       if (!walletClient || !creator) {
-         throw new Error("The connected wallet is not ready to sign.");
-       }
-       const signedMessage = articleSigningMessage({
-         chainId,
-         title,
-         subtitle,
-         content,
-         tags,
-         premium,
-       });
-       const signature = await walletClient.signMessage({
-         account: creator,
-         message: signedMessage,
-       });
-       formData.append("signedMessage", signedMessage);
-       formData.append("signature", signature);
+      formData.append("premium", String(premium));
+      if (!walletClient || !creator) {
+        throw new Error("The connected wallet is not ready to sign.");
+      }
+      const signedMessage = articleSigningMessage({
+        chainId,
+        title,
+        subtitle,
+        content,
+        tags,
+        premium,
+      });
+      const signature = await walletClient.signMessage({
+        account: creator,
+        message: signedMessage,
+      });
+      formData.append("signedMessage", signedMessage);
+      formData.append("signature", signature);
       if (image) formData.append("image", image);
 
       const res = await fetch("/api/articles", {
@@ -107,13 +110,13 @@ export default function ArticleForm() {
         body: formData,
       });
       const data = await res.json();
-       if (!res.ok) {
-         const parts: string[] = [data.error ?? "Publish failed"];
-         if (data.attempts) parts.push(`Attempts: ${data.attempts}`);
-         if (data.reason) parts.push(`Reason: ${data.reason}.`);
-         if (data.escaped) parts.push(`Escaped: ${data.escaped}`);
-         throw new Error(parts.join(" "));
-       }
+      if (!res.ok) {
+        const parts: string[] = [data.error ?? "Publish failed"];
+        if (data.attempts) parts.push(`Attempts: ${data.attempts}`);
+        if (data.reason) parts.push(`Reason: ${data.reason}.`);
+        if (data.escaped) parts.push(`Escaped: ${data.escaped}`);
+        throw new Error(parts.join(" "));
+      }
       toast.success("Published", { description: "Article is live." });
       try {
         await reload();
@@ -153,7 +156,7 @@ export default function ArticleForm() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Title of your article..."
-          disabled={loading}
+          disabled={formDisabled}
           required
         />
         {/* Subtitle */}
@@ -163,7 +166,7 @@ export default function ArticleForm() {
           value={subtitle}
           onChange={(e) => setSubtitle(e.target.value)}
           placeholder="A subtitle to frame the article..."
-          disabled={loading}
+          disabled={formDisabled}
         />
 
         <div className="grid h-full min-h-0 flex-1 gap-8 pt-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
@@ -183,7 +186,7 @@ export default function ArticleForm() {
                           active ? prev.filter((x) => x !== t) : [...prev, t],
                         )
                       }
-                      disabled={loading}
+                      disabled={formDisabled}
                       className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-1.5 text-[14px] font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${active ? "bg-wood text-cream" : "bg-paper-raised text-muted hover:bg-[#ece3d0] hover:text-ink"}`}
                     >
                       #{t}
@@ -200,7 +203,7 @@ export default function ArticleForm() {
               onChange={(e) => setContent(e.target.value)}
               placeholder="The full article body, stored on Swarm..."
               minLength={MIN_ARTICLE_CHARS}
-              disabled={loading}
+              disabled={formDisabled}
               required
             />
             <div className="flex items-center justify-between gap-4 font-mono text-[12px] text-muted">
@@ -223,7 +226,7 @@ export default function ArticleForm() {
                 </div>
                 <label
                   htmlFor="cover-image"
-                  className={`inline-flex cursor-pointer items-center gap-2 rounded-full border border-line bg-paper-card px-4 py-2 text-[14px] font-medium text-ink transition hover:bg-paper-card/70 ${loading ? "pointer-events-none opacity-50" : ""}`}
+                  className={`inline-flex cursor-pointer items-center gap-2 rounded-full border border-line bg-paper-card px-4 py-2 text-[14px] font-medium text-ink transition hover:bg-paper-card/70 ${formDisabled ? "pointer-events-none opacity-50" : ""}`}
                 >
                   <Icon name="image" size={18} />
                   {image ? "Change image" : "Choose image"}
@@ -244,9 +247,9 @@ export default function ArticleForm() {
                     }
                     setImage(selected);
                   }}
-                  disabled={loading}
-              />
-            </div>
+                  disabled={formDisabled}
+                />
+              </div>
               <AnimatePresence initial={false}>
                 {image && (
                   <motion.div
@@ -257,29 +260,29 @@ export default function ArticleForm() {
                     exit={{ opacity: 0, height: 0, y: -8 }}
                     transition={{ duration: 0.24, ease: "easeOut" }}
                   >
-                  {imagePreview && (
-                    <div className="h-40 w-full shrink-0 overflow-hidden rounded-md border border-line bg-paper-card">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={imagePreview} alt="Cover image preview" className="h-full w-full object-cover object-top" />
+                    {imagePreview && (
+                      <div className="h-40 w-full shrink-0 overflow-hidden rounded-md border border-line bg-paper-card">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={imagePreview} alt="Cover image preview" className="h-full w-full object-cover object-top" />
+                      </div>
+                    )}
+                    <div className="flex min-w-0 items-center gap-2 font-mono text-[12px] text-muted">
+                      <Icon name="check_circle" size={16} />
+                      <span className="truncate">{image.name}</span>
+                      <span>({(image.size / 1024 / 1024).toFixed(1)} MB)</span>
+                      <button
+                        type="button"
+                        className="ml-auto inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted transition hover:bg-paper-card hover:text-ink"
+                        aria-label="Remove cover image"
+                        onClick={() => {
+                          setImage(null);
+                          if (imageInputRef.current) imageInputRef.current.value = "";
+                        }}
+                        disabled={formDisabled}
+                      >
+                        <Icon name="close" size={16} />
+                      </button>
                     </div>
-                  )}
-                  <div className="flex min-w-0 items-center gap-2 font-mono text-[12px] text-muted">
-                    <Icon name="check_circle" size={16} />
-                    <span className="truncate">{image.name}</span>
-                    <span>({(image.size / 1024 / 1024).toFixed(1)} MB)</span>
-                    <button
-                      type="button"
-                      className="ml-auto inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted transition hover:bg-paper-card hover:text-ink"
-                      aria-label="Remove cover image"
-                      onClick={() => {
-                        setImage(null);
-                        if (imageInputRef.current) imageInputRef.current.value = "";
-                      }}
-                      disabled={loading}
-                    >
-                      <Icon name="close" size={16} />
-                    </button>
-                  </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -294,13 +297,13 @@ export default function ArticleForm() {
                   </span>
                   <span className="font-display text-title-lg">Premium content</span>
                 </div>
-                <label className={`relative inline-flex items-center ${loading || subscriptionPriceLoading || !hasSubscriptionPrice ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}>
+                <label className={`relative inline-flex items-center ${formDisabled || subscriptionPriceLoading || !hasSubscriptionPrice ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}>
                   <input
                     className="peer sr-only"
                     type="checkbox"
                     checked={premium}
                     onChange={(e) => setPremium(e.target.checked)}
-                    disabled={loading || subscriptionPriceLoading || !hasSubscriptionPrice}
+                    disabled={formDisabled || subscriptionPriceLoading || !hasSubscriptionPrice}
                   />
                   <span className="relative h-8 w-14 rounded-full bg-line-strong transition-colors after:absolute after:left-1 after:top-1 after:h-6 after:w-6 after:rounded-full after:bg-paper-card after:transition-transform peer-checked:bg-honey peer-checked:after:translate-x-6" />
                 </label>
@@ -317,15 +320,15 @@ export default function ArticleForm() {
 
       <div className="mt-8 grid gap-4 border-t border-line pt-5 sm:grid-cols-2 sm:items-start">
         <div className="inline-flex items-center gap-3 justify-self-start rounded-full bg-paper-raised px-4 py-2.5">
-          <Avatar size={28} name={creator} />
+          <Avatar size={28} name={profile?.displayName || creator} src={profile?.avatarData ?? undefined} />
           <span className="text-body-sm text-muted">Writing as</span>
-           <span className="font-mono text-[13px] font-semibold">{creator}</span>
+          <span className="font-mono text-[13px] font-semibold -ml-1">{profile?.displayName || creator}</span>
         </div>
         <Button
           type="submit"
           form="write-form"
           icon="cloud_upload"
-          disabled={loading || content.length < MIN_ARTICLE_CHARS}
+          disabled={formDisabled || content.length < MIN_ARTICLE_CHARS}
           className="h-[48px] justify-self-start sm:justify-self-end"
         >
           {loading ? "Broadcasting…" : "Publish Article"}

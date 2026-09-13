@@ -9,6 +9,7 @@ import WalletButton from "./ConnectButton";
 const LINKS = [
   { href: "/", label: "Feed" },
   { href: "/explore", label: "Explore" },
+  { href: "/subscriptions", label: "Subscriptions" },
   { href: "/write", label: "Write" },
   { href: "/dashboard", label: "Dashboard" },
 ];

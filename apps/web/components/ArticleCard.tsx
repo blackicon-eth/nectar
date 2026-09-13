@@ -9,10 +9,12 @@ export default function ArticleCard({
   article,
   variant = "compact",
   cover,
+  showCreator = true,
 }: {
   article: Article;
   variant?: "featured" | "compact" | "horizontal";
   cover?: string;
+  showCreator?: boolean;
 }) {
   const accessBadge = article.premium ? (
     <Badge tier="premium" icon="lock">
@@ -25,8 +27,12 @@ export default function ArticleCard({
   );
 
   const tags = article.tags ?? [];
-  const image = cover ?? article.cover ?? coverFor(article.key);
+  const image = cover
+    ?? (article.imageRef
+      ? `/api/images/${article.imageRef}?contentType=${encodeURIComponent(article.imageContentType ?? "")}`
+      : article.cover ?? coverFor(article.key));
   const articleUrl = `/article/${article.swarmRef}`;
+  const creatorName = article.profileName || article.creatorEnsName || article.creator;
 
   if (variant === "featured") {
     return (
@@ -41,8 +47,8 @@ export default function ArticleCard({
           <div>
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-2 font-mono text-[13px] font-semibold">
-                <Avatar size={28} name={article.creator} />
-                {article.creatorEnsName || article.creator}
+                 <Avatar size={28} name={creatorName} src={article.profileAvatar} />
+                 {creatorName}
               </span>
               <span className="font-mono text-[13px] text-muted">
                 {readTime(article)} · {formatDate(article.publishedAt)}
@@ -84,8 +90,8 @@ export default function ArticleCard({
           <p className="line-clamp-2 text-[15px] leading-relaxed text-muted">{article.excerpt}</p>
           <div className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-2 font-mono text-[13px] font-semibold">
-              <Avatar size={22} name={article.creator} />
-              {article.creatorEnsName || article.creator}
+               <Avatar size={22} name={creatorName} src={article.profileAvatar} />
+               {creatorName}
             </span>
             <div className="flex gap-1.5">
               {tags.slice(0, 2).map((t) => (
@@ -119,13 +125,15 @@ export default function ArticleCard({
             </span>
           ))}
         </div>
-        <div className="flex items-center justify-between gap-2 border-t border-line pt-3">
-          <span className="flex items-center gap-1.5">
-            <Avatar size={20} name={article.creator} />
-            <span className="font-mono text-[13px] text-muted">
-              {article.creatorEnsName || article.creator}
+        <div className={`flex items-center gap-2 border-t border-line pt-3 ${showCreator ? "justify-between" : "justify-end"}`}>
+          {showCreator && (
+            <span className="flex items-center gap-1.5">
+              <Avatar size={20} name={creatorName} src={article.profileAvatar} />
+              <span className="font-mono text-[13px] text-muted">
+                {creatorName}
+              </span>
             </span>
-          </span>
+          )}
           <span className="font-mono text-[13px] text-muted">
             {formatDate(article.publishedAt)}
           </span>

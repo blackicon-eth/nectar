@@ -1,31 +1,28 @@
 "use client";
 
 import { useArticles } from "@/components/ArticlesProvider";
+import { short } from "@/lib/articles";
 import ArticleCard from "./ArticleCard";
 import Avatar from "./ui/Avatar";
 import Button from "./ui/Button";
 import Icon from "./ui/Icon";
-import TopicPill from "./ui/TopicPill";
 import Spinner from "./ui/Spinner";
-
-const TOPICS = [
-  { label: "Featured Articles", icon: "auto_awesome", active: true },
-  { label: "Top Naturalists", icon: "psychology" },
-  { label: "Philosophy", icon: "menu_book" },
-  { label: "Longform Essays", icon: "ink_pen" },
-];
-
-const TRENDING = [
-  { name: "pippo.nectar.eth", subs: "1,420 subscribers" },
-  { name: "elena.nectar.eth", subs: "2,890 subscribers" },
-  { name: "sylvan.nectar.eth", subs: "912 subscribers" },
-];
 
 export default function FeedView() {
   const { articles, status, reload } = useArticles();
-
   const [featured, ...rest] = articles;
-  const secondary = rest.slice(0, 4);
+  const hives = Array.from(
+    articles.reduce((map, article) => {
+      const key = article.creatorAddress.toLowerCase();
+      const current = map.get(key);
+      map.set(key, {
+        name: article.profileName || article.creatorEnsName || short(article.creator, 6),
+        avatar: article.profileAvatar,
+        count: (current?.count ?? 0) + 1,
+      });
+      return map;
+    }, new Map<string, { name: string; avatar?: string; count: number }>()),
+  ).slice(0, 3);
 
   return (
     <>
@@ -43,11 +40,6 @@ export default function FeedView() {
               Free public readings preserved alongside gilded premium articles,
               immutably recorded.
             </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {TOPICS.map((t) => (
-                <TopicPill key={t.label} label={t.label} icon={t.icon} active={t.active} />
-              ))}
-            </div>
           </div>
         </div>
       </section>
@@ -55,6 +47,11 @@ export default function FeedView() {
       {/* Feed grid */}
       <section className="mx-auto w-full max-w-[1800px] px-8 py-10 md:px-8">
         <div className="grid items-start gap-6 lg:grid-cols-[1fr_320px]">
+          {featured && (
+            <div className="col-span-full font-mono text-[14px] uppercase tracking-[0.12em] text-muted">
+              Suggested articles
+            </div>
+          )}
           <div className="flex flex-col gap-6">
             {status === "loading" && (
               <div className="flex min-h-[220px] items-center justify-center rounded-md border border-dashed border-line bg-paper-card/50 p-6">
@@ -78,12 +75,10 @@ export default function FeedView() {
               </div>
             )}
 
-            {featured && (
-              <ArticleCard article={featured} variant="featured" />
-            )}
+            {featured && <ArticleCard article={featured} variant="featured" />}
 
             <div className="grid gap-6 md:grid-cols-2">
-              {secondary.map((a) => (
+              {rest.map((a) => (
                 <ArticleCard key={a.key} article={a} />
               ))}
             </div>
@@ -106,8 +101,10 @@ export default function FeedView() {
                     className="py-3 no-underline"
                     style={{ borderTop: i === 0 ? "none" : "1px solid var(--color-line)" }}
                   >
-                    <div className="font-mono text-[12px] text-muted">
-                      <span className="font-semibold text-amber">0{i + 1}</span> by {a.creator.slice(0, 10)}...{a.creator.slice(30)}
+                    <div className="flex items-center gap-2 font-mono text-[12px] text-muted">
+                      <span className="font-semibold text-amber">0{i + 1}</span>
+                      <Avatar size={18} name={a.profileName || a.creatorEnsName || a.creator} src={a.profileAvatar} />
+                      <span className="truncate">{a.profileName || a.creatorEnsName || `${a.creator.slice(0, 10)}...${a.creator.slice(30)}`}</span>
                     </div>
                     <div className="font-display mt-1 text-[18px] font-semibold">{a.title}</div>
                   </a>
@@ -118,25 +115,22 @@ export default function FeedView() {
             <div className="rounded-lg border border-line bg-paper-card p-6 shadow-card">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-display text-title-lg flex items-center gap-1.5">
-                  <Icon name="trending_up" size={20} /> Trending Hives
+                  <Icon name="trending_up" size={20} /> Trending Creators
                 </h3>
-                <a href="/explore" className="font-mono text-[13px] text-amber no-underline">
-                  View all
-                </a>
               </div>
               <div className="flex flex-col gap-4">
-                {TRENDING.map((t) => (
-                  <div key={t.name} className="flex items-center justify-between">
+                {hives.map(([key, hive]) => (
+                  <div key={key} className="flex items-center gap-2.5">
                     <div className="flex items-center gap-2.5">
-                      <Avatar size={38} name={t.name} />
+                      <Avatar size={38} name={hive.name} src={hive.avatar} />
                       <div>
-                        <div className="font-mono text-[13px] font-semibold">{t.name}</div>
-                        <div className="text-body-sm text-muted">{t.subs}</div>
+                        <div className="font-mono text-[13px] font-semibold">{hive.name}</div>
+                        <div className="text-body-sm text-muted">{hive.count} {hive.count === 1 ? "article" : "articles"}</div>
                       </div>
                     </div>
-                    <button className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-paper-raised px-4 py-1.5 text-[14px] font-medium text-muted transition hover:bg-[#ece3d0] hover:text-ink">Follow</button>
                   </div>
                 ))}
+                {hives.length === 0 && <div className="text-body-sm text-muted">Creator activity will appear here.</div>}
               </div>
             </div>
           </aside>

@@ -16,6 +16,9 @@ export {
 export {
   createSubscriptionEntity,
   hasActiveSubscription,
+  listActiveSubscriptions,
+  countActiveSubscribers,
   type CreateSubscriptionOptions,
   type SubscriptionEntityFields,
+  type ListedSubscription,
 } from "./subscriptions";

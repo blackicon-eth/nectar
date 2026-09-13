@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { useAccount, useChainId, useSwitchChain, useWalletClient } from "wagmi";
 import { avalancheFuji } from "wagmi/chains";
 import type { Article } from "@/lib/articles";
 import { fetchArticles, formatDate, readTime } from "@/lib/articles";
@@ -22,18 +23,27 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [checkingAccess, setCheckingAccess] = useState(false);
   const [premiumLocked, setPremiumLocked] = useState(false);
   const [refreshToken, setRefreshToken] = useState(0);
   const { address, signing, signIn, status } = useAuth();
   const { isConnected } = useAccount();
+  const { data: walletClient } = useWalletClient();
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
   const { openConnectModal } = useConnectModal();
 
   useEffect(() => {
+    if (isConnected && walletClient && chainId === avalancheFuji.id && status === "signed-out" && !signing) {
+      void signIn();
+    }
+  }, [chainId, isConnected, signIn, signing, status, walletClient]);
+
+  useEffect(() => {
     let cancelled = false;
 
     async function loadArticle() {
+      setCheckingAccess(true);
       try {
         const articles = await fetchArticles();
         const match = articles.find((item) => item.swarmRef === reference);
@@ -77,6 +87,7 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Unable to load this article.");
       } finally {
+        setCheckingAccess(false);
         if (!cancelled) setLoading(false);
       }
     }
@@ -126,10 +137,10 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
       <header className="grid gap-10 pb-10 pt-2 md:pb-14 md:pt-4 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.72fr)] lg:items-end lg:gap-16">
         <div className="max-w-[780px]">
           <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[12px] uppercase tracking-[0.1em] text-muted">
-            <span className="flex items-center gap-2 text-ink">
-              <Avatar size={25} name={article.creator} />
-              {article.creatorEnsName || article.creator}
-            </span>
+            <Link href={`/creator/${article.creatorAddress}`} className="flex items-center gap-2 text-ink no-underline transition hover:text-honey">
+              <Avatar size={25} name={article.profileName || article.creatorEnsName || article.creator} src={article.profileAvatar} />
+              {article.profileName || article.creatorEnsName || article.creator}
+            </Link>
             <span className="text-line-strong">•</span>
             <span>{formatDate(article.publishedAt)}</span>
             <span>{readTime(article, content)}</span>
@@ -192,6 +203,7 @@ export default function ArticleReader({ reference }: ArticleReaderProps) {
                 status={status}
                 switchChain={() => switchChain({ chainId: avalancheFuji.id })}
                 onSubscribed={() => setRefreshToken((value) => value + 1)}
+                checkingAccess={checkingAccess}
               />
             </motion.div>
           ) : (
@@ -232,6 +244,7 @@ function PremiumPreview({
   status,
   switchChain,
   onSubscribed,
+  checkingAccess,
 }: {
   article: Article;
   isConnected: boolean;
@@ -242,14 +255,16 @@ function PremiumPreview({
   status: "checking" | "signed-out" | "signed-in";
   switchChain: () => void;
   onSubscribed: () => void;
+  checkingAccess: boolean;
 }) {
   const checking = status === "checking";
   const signedIn = status === "signed-in";
   const needsWallet = !isConnected;
   const needsNetwork = isConnected && !onFuji;
   const needsSignature = isConnected && onFuji && !signedIn;
+  const accessPending = checkingAccess;
 
-  const label = checking
+  const label = checking || accessPending
     ? "Checking access"
     : needsWallet
       ? "Connect wallet to continue"
@@ -264,6 +279,7 @@ function PremiumPreview({
   const icon = needsWallet || needsNetwork ? "account_balance_wallet" : needsSignature ? "draw" : "lock_open";
 
   function handleClick() {
+    if (accessPending) return;
     if (needsWallet) {
       openConnectModal?.();
     } else if (needsNetwork) {
@@ -301,17 +317,17 @@ function PremiumPreview({
                 : "Your subscription record is not active for this creator yet."}
             </p>
           </div>
-          {signedIn ? (
+          {signedIn && !accessPending ? (
             <SubscriptionModal
               creatorAddress={article.creatorAddress}
-              creatorName={article.creatorEnsName || article.creator}
+              creatorName={article.profileName || article.creatorEnsName || article.creator}
               onSuccess={onSubscribed}
             />
           ) : (
             <Button
               className="shrink-0"
               icon={icon}
-              disabled={checking || signing}
+              disabled={checking || signing || accessPending}
               onClick={handleClick}
             >
               {label}

@@ -68,3 +68,82 @@ export async function hasActiveSubscription(
     return (typeof value === "bigint" ? value : BigInt(String(value ?? 0))) > now;
   });
 }
+
+export interface ListedSubscription {
+  key: string;
+  subscriber: string;
+  creator: string;
+  expiresAt: Date;
+  paymentTxHash: string;
+  amount: bigint;
+}
+
+export async function listActiveSubscriptions(
+  subscriber: string,
+  options: { rpcUrl?: string } = {},
+): Promise<ListedSubscription[]> {
+  const client = createArkivPublicClient(options.rpcUrl);
+  const page = await client
+    .select({ key: true, attributes: true, payload: true })
+    .where(
+      eq("project", str("nectar")),
+      eq("type", str("subscription")),
+      eq("subscriber", str(subscriber.toLowerCase())),
+    )
+    .limit(100)
+    .fetch();
+
+  const now = Date.now();
+  return page.entities.flatMap((entity) => {
+    let payload: Record<string, unknown> = {};
+    try {
+      payload = entity.toJson() as Record<string, unknown>;
+    } catch {
+      // Subscription access is also indexed in attributes, so a malformed
+      // payload should not make the reader's entire shelf unavailable.
+    }
+    const attr = (name: string): unknown => entity.attributes[name]?.value;
+    const expiresAtMs = attr("expires_at_ms");
+    const expiresAt = new Date(
+      expiresAtMs !== undefined
+        ? Number(expiresAtMs)
+        : String(payload.expiresAt ?? 0),
+    );
+    if (expiresAt.getTime() <= now) return [];
+
+    return [{
+      key: entity.key,
+      subscriber: String(payload.subscriber ?? attr("subscriber") ?? subscriber),
+      creator: String(payload.creator ?? attr("creator") ?? ""),
+      expiresAt,
+      paymentTxHash: String(payload.paymentTxHash ?? attr("payment_tx_hash") ?? ""),
+      amount: BigInt(String(payload.amount ?? attr("amount") ?? 0)),
+    }];
+  });
+}
+
+export async function countActiveSubscribers(
+  creator: string,
+  options: { rpcUrl?: string } = {},
+): Promise<number> {
+  const client = createArkivPublicClient(options.rpcUrl);
+  const page = await client
+    .select({ key: true, attributes: true })
+    .where(
+      eq("project", str("nectar")),
+      eq("type", str("subscription")),
+      eq("creator", str(creator.toLowerCase())),
+    )
+    .limit(100)
+    .fetch();
+
+  const now = Date.now();
+  const subscribers = new Set<string>();
+  for (const entity of page.entities) {
+    const expiresAt = entity.attributes.expires_at_ms?.value;
+    const subscriber = entity.attributes.subscriber?.value;
+    if (expiresAt === undefined || subscriber === undefined) continue;
+    if (Number(expiresAt) > now) subscribers.add(String(subscriber).toLowerCase());
+  }
+  return subscribers.size;
+}

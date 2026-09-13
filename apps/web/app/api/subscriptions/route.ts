@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { avalancheFuji } from "viem/chains";
 import { createPublicClient, http, parseEventLogs } from "viem";
 import { getConfig } from "@nectar/config";
-import { createSubscriptionEntity } from "@nectar/arkiv";
+import { countActiveSubscribers, createSubscriptionEntity, listActiveSubscriptions } from "@nectar/arkiv";
 import { getSession, sessionCookieName } from "@/lib/auth";
 import { SUBSCRIPTIONS_ADDRESS } from "@/lib/subscriptions";
 
@@ -92,6 +92,44 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to index subscription.";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const session = await getSession(
+      (await cookies()).get(sessionCookieName())?.value,
+    );
+    if (!session) {
+      return NextResponse.json({ error: "Sign in to view your subscriptions." }, { status: 401 });
+    }
+
+    const creator = new URL(request.url).searchParams.get("creator");
+    if (creator) {
+      if (!/^0x[0-9a-fA-F]{40}$/.test(creator)) {
+        return NextResponse.json({ error: "Invalid creator address." }, { status: 400 });
+      }
+      const config = getConfig();
+      const subscriberCount = await countActiveSubscribers(creator, { rpcUrl: config.arkiv.rpcUrl });
+      return NextResponse.json({ subscriberCount });
+    }
+
+    const config = getConfig();
+    const subscriptions = await listActiveSubscriptions(session.walletAddress, {
+      rpcUrl: config.arkiv.rpcUrl,
+    });
+
+    return NextResponse.json({
+      subscriptions: subscriptions.map(({ key, creator, expiresAt }) => ({
+        key,
+        creator,
+        expiresAt: expiresAt.toISOString(),
+      })),
+    });
+  } catch (error) {
+    console.error("Unable to load subscriptions", error);
+    const message = error instanceof Error ? error.message : "Unable to load subscriptions.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

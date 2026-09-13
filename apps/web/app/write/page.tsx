@@ -6,6 +6,7 @@ export default function WritePage() {
     <WalletGate
       title="Connect to start writing"
       description="Your wallet identifies you as the author and anchors your publication to the Nectar network."
+      autoSignIn
     >
       <ArticleForm />
     </WalletGate>

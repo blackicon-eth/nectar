@@ -5,4 +5,5 @@ export * from "./articles";
 export * from "./cache";
 export * from "./jobs";
 export * from "./auth";
+export * from "./profiles";
 export * from "./common";

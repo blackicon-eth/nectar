@@ -1,9 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useEffect } from "react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { AnimatePresence, motion } from "motion/react";
-import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { useAccount, useChainId, useSwitchChain, useWalletClient } from "wagmi";
 import { avalancheFuji } from "wagmi/chains";
 import Button from "./ui/Button";
 import Icon from "./ui/Icon";
@@ -13,22 +14,31 @@ type WalletGateProps = {
   children: ReactNode;
   title: string;
   description: string;
+  autoSignIn?: boolean;
 };
 
 export default function WalletGate({
   children,
   title,
   description,
+  autoSignIn = false,
 }: WalletGateProps) {
   const { isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
+  const { data: walletClient } = useWalletClient();
   const { openConnectModal } = useConnectModal();
   const { status, signing, signIn } = useAuth();
   const checking = status === "checking";
   const authenticated = status === "signed-in";
   const onFuji = chainId === avalancheFuji.id;
-  const walletReady = isConnected && !checking && onFuji;
+  const walletReady = isConnected && Boolean(walletClient) && !checking && onFuji;
+
+  useEffect(() => {
+    if (autoSignIn && walletReady && status === "signed-out" && !signing) {
+      void signIn();
+    }
+  }, [autoSignIn, signIn, signing, status, walletReady]);
 
   return (
     <AnimatePresence mode="wait" initial={false}>

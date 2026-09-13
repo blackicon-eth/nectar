@@ -10,6 +10,7 @@ import { articleSigningMessage } from "@/lib/articleSigning";
 import { recoverMessageAddress } from "viem";
 import { cookies } from "next/headers";
 import { getSession, sessionCookieName } from "@/lib/auth";
+import { getProfiles, getProfile } from "@/lib/profile";
 
 export const runtime = "nodejs";
 
@@ -219,7 +220,14 @@ export async function POST(request: Request) {
       };
     }
 
-    const result = await publishArticle(parsed.data, image);
+    const profile = await getProfile(session.walletAddress);
+    const result = await publishArticle(
+      {
+        ...parsed.data,
+        creatorEnsName: profile?.displayName ?? parsed.data.creatorEnsName,
+      },
+      image,
+    );
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     if (error instanceof PublishError) {
@@ -234,7 +242,17 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     const articles = await listPublishedArticles();
-    return NextResponse.json({ articles });
+    const profiles = await getProfiles(articles.map((article) => article.creatorAddress));
+    return NextResponse.json({
+      articles: articles.map((article) => {
+        const profile = profiles.get(article.creatorAddress.toLowerCase());
+        return {
+          ...article,
+          profileName: profile?.displayName ?? undefined,
+          profileAvatar: profile?.avatarData ?? undefined,
+        };
+      }),
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unexpected error";
